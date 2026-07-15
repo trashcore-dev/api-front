@@ -316,19 +316,8 @@ select{ appearance:none; cursor:pointer;
             Please confirm you've read and agree to these terms before continuing.
         </div>
         <div class="gate-actions">
-            <button class="gate-btn decline" id="declineBtn">Decline</button>
-            <button class="gate-btn accept" id="acceptBtn">Accept &amp; Continue</button>
+            <button class="gate-btn accept" id="acceptBtn" style="flex:1;">Accept &amp; Continue</button>
         </div>
-    </div>
-</div>
-
-<!-- ============ DECLINED SCREEN ============ -->
-<div class="declined" id="declinedScreen" hidden>
-    <div class="declined-inner">
-        <div class="stamp">Access withheld</div>
-        <h2>You need to accept the guidelines to continue</h2>
-        <p>No report can be generated until the intake guidelines are accepted. You can review them again any time.</p>
-        <button id="reviewBtn">Review guidelines again</button>
     </div>
 </div>
 
@@ -421,27 +410,29 @@ select{ appearance:none; cursor:pointer;
 
 <script>
 // ============================================
-// GATE LOGIC
+// GATE LOGIC — terms acceptance persists across visits
 // ============================================
+const TERMS_KEY = 'wra_terms_accepted_v1';
 const gate = document.getElementById('gate');
-const declinedScreen = document.getElementById('declinedScreen');
 const app = document.getElementById('app');
 
-document.getElementById('acceptBtn').addEventListener('click', () => {
-    gate.remove();
+function enterApp() {
+    gate.hidden = true;
     app.hidden = false;
     init();
+}
+
+document.getElementById('acceptBtn').addEventListener('click', () => {
+    try { localStorage.setItem(TERMS_KEY, 'true'); } catch (e) { /* storage unavailable, proceed anyway */ }
+    enterApp();
 });
 
-document.getElementById('declineBtn').addEventListener('click', () => {
-    gate.hidden = true;
-    declinedScreen.hidden = false;
-});
-
-document.getElementById('reviewBtn').addEventListener('click', () => {
-    declinedScreen.hidden = true;
-    gate.hidden = false;
-});
+// On load: skip the gate if terms were already accepted in a previous visit
+(function checkPriorAcceptance() {
+    let alreadyAccepted = false;
+    try { alreadyAccepted = localStorage.getItem(TERMS_KEY) === 'true'; } catch (e) {}
+    if (alreadyAccepted) enterApp();
+})();
 
 // ============================================
 // THEME TOGGLE (in-memory only — no storage APIs)
