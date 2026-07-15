@@ -1077,6 +1077,20 @@ footer strong{color:var(--text2)}
 
 <script>
 const API_BASE='https://apis-production-828f.up.railway.app';
+// ── loader failsafe: guarantees the loading screen ALWAYS clears,
+//    even if an unrelated error later in this script throws ──
+(function(){
+  function killLoader(){
+    const loader = document.getElementById('loader')
+    if(!loader) return
+    loader.classList.add('fade-out')
+    setTimeout(()=>{ loader.style.display='none' },600)
+  }
+  setTimeout(killLoader, 10600)
+  window.addEventListener('error', function(e){
+    console.error('Caught error, loader failsafe engaged:', e.message)
+  })
+})();
 // ══════════════════════════════════════════════════════════
 //  THEME
 // ══════════════════════════════════════════════════════════
@@ -1505,6 +1519,4 @@ const CATS=[
   ]},
   {id:'nsfw',name:'NSFW',count:4,desc:'Adult content scrapers — XNXX and Xvideos search and video metadata (18+ only)',eps:[
     {name:'XNXX Search',path:'/nsfw/sxnxx',desc:'Search XNXX and return video results.',params:[{n:'q',req:1,ph:'search query'}],ex:'"result":[{"title":"...","link":"https://www.xnxx.com/video-..."}]'},
-    {name:'XNXX Video Info',path:'/nsfw/xnxx',desc:'Scrape metadata and download URL from an XNXX video page.',params:[{n:'url',req:1,ph:'https://www.xnxx.com/video-...'}],ex:'"title":"...","duration":"12 min","url_dl":"https://..."'},
-    {name:'Xvideos Search',path:'/nsfw/sxvideos',desc:'Search Xvideos.',params:[{n:'q',req:1,ph:'search query'}],ex:'[{"title":"...","duration":"10:32","quality":"HD"}]'},
-    {name:'Xvideos Video Info',path:'/nsfw/xvideos',desc:'Scrape metadata from an Xvideos video page.',params:[{n:'url',req:1,ph:'https://www.xvideo
+    {name:'XNXX Video Info',path:'/nsfw/xnxx',desc:
