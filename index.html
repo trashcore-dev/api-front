@@ -1,1053 +1,701 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Report Assistant - By Lord Diego</title>
-    <style>
-        /* CSS Variables for modern color scheme */
-        :root {
-            --primary: #6C3CE1;
-            --primary-dark: #5A2FC7;
-            --secondary: #FF6B6B;
-            --accent: #4ECDC4;
-            --dark: #1a1a2e;
-            --dark-secondary: #16213e;
-            --dark-tertiary: #0f3460;
-            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --shadow: 0 20px 60px rgba(0,0,0,0.3);
-            --shadow-hover: 0 25px 80px rgba(108, 60, 225, 0.3);
-            --radius: 20px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--dark);
-            min-height: 100vh;
-            color: #fff;
-            overflow-x: hidden;
-        }
-
-        /* Animated background */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            background: var(--dark);
-            overflow: hidden;
-        }
-
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(108, 60, 225, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 50% 80%, rgba(78, 205, 196, 0.08) 0%, transparent 50%);
-            animation: rotate 60s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Floating particles */
-        .particles {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(108, 60, 225, 0.3);
-            border-radius: 50%;
-            animation: float linear infinite;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% {
-                transform: translateY(-100vh) rotate(720deg);
-                opacity: 0;
-            }
-        }
-
-        /* Main Container */
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            min-height: 100vh;
-            align-items: start;
-        }
-
-        /* Glassmorphism Cards */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow);
-            padding: 30px;
-            transition: all 0.3s ease;
-            color: var(--dark);
-        }
-
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        /* Header Section */
-        .header-section {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        .title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(108, 60, 225, 0.3);
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 300;
-        }
-
-        .subtitle span {
-            background: var(--gradient-2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 700;
-        }
-
-        .badge {
-            display: inline-block;
-            background: var(--gradient-2);
-            color: white;
-            padding: 5px 20px;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-top: 10px;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .connection-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-
-        .connection-status.online {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .connection-status.offline {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        /* Stats Section */
-        .stats-section {
-            grid-column: 1 / -1;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: var(--radius);
-            padding: 25px;
-            text-align: center;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-            color: var(--dark);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 5px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        /* Form Section */
-        .form-section {
-            grid-column: 1;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            color: #444;
-            margin-bottom: 6px;
-            font-size: 0.95rem;
-        }
-
-        label .required {
-            color: #dc3545;
-        }
-
-        input[type="tel"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            background: white;
-        }
-
-        input[type="tel"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(108, 60, 225, 0.1);
-            transform: scale(1.01);
-        }
-
-        input[type="tel"].error,
-        textarea.error,
-        select.error {
-            border-color: #dc3545;
-            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 36px;
-            cursor: pointer;
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 16px;
-            background: var(--gradient-1);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(108, 60, 225, 0.4);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-submit .loading-spinner {
-            display: none;
-            animation: spin 0.8s linear infinite;
-        }
-
-        .btn-submit.loading .loading-spinner {
-            display: inline-block;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Report Section */
-        .report-section {
-            grid-column: 2;
-        }
-
-        .report-output {
-            width: 100%;
-            min-height: 300px;
-            padding: 16px;
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: #333;
-            resize: vertical;
-            transition: all 0.3s ease;
-        }
-
-        .report-output:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(108, 60, 225, 0.1);
-        }
-
-        .report-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            flex: 1;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 100px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-action:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-copy {
-            background: var(--gradient-3);
-            color: white;
-        }
-
-        .btn-download {
-            background: var(--gradient-2);
-            color: white;
-        }
-
-        .btn-clear {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 15px 25px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            z-index: 1000;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            background: linear-gradient(135deg, #00b09b, #96c93d);
-        }
-
-        .toast.error {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-        }
-
-        .toast.info {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-        }
-
-        /* Recent Reports */
-        .recent-reports {
-            grid-column: 1 / -1;
-        }
-
-        .reports-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .report-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.2s;
-            cursor: pointer;
-        }
-
-        .report-item:hover {
-            background: #f8f9fa;
-        }
-
-        .report-item .phone {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .report-item .reason {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .report-item .date {
-            color: #999;
-            font-size: 0.8rem;
-        }
-
-        .status-badge {
-            padding: 3px 12px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-resolved {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 15px;
-            }
-
-            .form-section,
-            .report-section {
-                grid-column: 1;
-            }
-
-            .title {
-                font-size: 2.5rem;
-            }
-
-            .stats-section {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .title {
-                font-size: 1.8rem;
-            }
-
-            .stats-section {
-                grid-template-columns: 1fr;
-            }
-
-            .glass-card {
-                padding: 20px;
-            }
-
-            .report-actions {
-                flex-direction: column;
-            }
-
-            .btn-action {
-                width: 100%;
-            }
-        }
-
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--gradient-1);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--gradient-2);
-        }
-
-        /* Animation for new reports */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .report-section.show {
-            animation: slideIn 0.5s ease-out;
-        }
-
-        /* API URL display */
-        .api-info {
-            position: fixed;
-            bottom: 10px;
-            left: 10px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.3);
-            z-index: 100;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 10px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Report Assistant — Case Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+    --bg: #0C0E10;
+    --bg-alt: #15181B;
+    --bg-raised: #1B1F23;
+    --ink: #ECE8DE;
+    --ink-dim: #8B9099;
+    --border: rgba(236,232,222,0.10);
+    --accent: #FF9F1C;
+    --accent-ink: #1A1200;
+    --accent-2: #3DDC97;
+    --danger: #FF5C5C;
+    --shadow: 0 20px 50px rgba(0,0,0,0.45);
+    --radius: 10px;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+html[data-theme="light"]{
+    --bg: #F3F0E9;
+    --bg-alt: #FFFFFF;
+    --bg-raised: #FBFAF6;
+    --ink: #171A1D;
+    --ink-dim: #6B7078;
+    --border: rgba(23,26,29,0.10);
+    --accent-ink: #FFF6E8;
+    --shadow: 0 20px 50px rgba(23,20,10,0.12);
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    transition: background .35s ease, color .35s ease;
+}
+
+/* ===================== GATE (GUIDELINES) ===================== */
+.gate{
+    position: fixed; inset: 0; z-index: 500;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+}
+.gate::before{
+    content:'';
+    position:absolute; inset:0;
+    background:
+        repeating-linear-gradient(0deg, rgba(255,159,28,0.035) 0px, rgba(255,159,28,0.035) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+}
+.gate-card{
+    position:relative;
+    max-width: 560px; width:100%;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px 36px 32px;
+}
+.gate-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display:flex; align-items:center; gap:10px;
+    margin-bottom: 18px;
+}
+.gate-eyebrow::before{
+    content:''; width:8px; height:8px; border-radius:50%;
+    background: var(--accent); display:inline-block;
+}
+.gate-card h1{
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 600;
+    line-height: 1.15;
+    margin-bottom: 18px;
+}
+.gate-terms{
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--ink-dim);
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-bottom: 26px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+.gate-terms strong{ color: var(--ink); font-weight: 600; }
+.gate-terms ol{ margin: 10px 0 10px 20px; }
+.gate-terms li{ margin-bottom: 8px; }
+.gate-actions{ display:flex; gap:12px; }
+.gate-btn{
+    flex:1;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform .15s ease, opacity .15s ease;
+}
+.gate-btn:hover{ transform: translateY(-2px); }
+.gate-btn.accept{ background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.gate-btn.decline{ background: transparent; color: var(--ink-dim); }
+
+/* ===================== DECLINED SCREEN ===================== */
+.declined{
+    position: fixed; inset:0; z-index: 500;
+    background: var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    padding: 24px; text-align:center;
+}
+.declined-inner{ max-width: 440px; }
+.declined-inner .stamp{
+    font-family: var(--font-mono);
+    font-size: 0.75rem; letter-spacing:0.2em; text-transform:uppercase;
+    color: var(--danger); border: 1px solid var(--danger);
+    display:inline-block; padding:6px 14px; border-radius: 50px; margin-bottom: 18px;
+    transform: rotate(-3deg);
+}
+.declined-inner h2{ font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 12px; }
+.declined-inner p{ color: var(--ink-dim); line-height:1.6; margin-bottom: 24px; }
+.declined-inner button{
+    padding: 12px 24px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg-alt); color: var(--ink); font-family: var(--font-mono);
+    font-size: 0.8rem; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer;
+}
+
+/* ===================== THEME TOGGLE ===================== */
+.theme-toggle{
+    position: fixed; top: 20px; right: 20px; z-index: 400;
+    background: var(--bg-alt); border: 1px solid var(--border);
+    border-radius: 50px; padding: 8px 16px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink);
+    display:flex; align-items:center; gap:8px;
+    box-shadow: var(--shadow);
+}
+
+/* ===================== LAYOUT ===================== */
+.app[hidden]{ display:none; }
+.wrap{
+    max-width: 1180px; margin: 0 auto; padding: 70px 24px 60px;
+    display:grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items:start;
+}
+.masthead{
+    grid-column: 1/-1;
+    display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 22px; margin-bottom: 6px;
+}
+.masthead h1{
+    font-family: var(--font-display); font-weight:700; font-size: 2.4rem; letter-spacing:-0.01em;
+}
+.masthead .tag{
+    font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-dim);
+    display:flex; align-items:center; gap:8px;
+}
+.status-dot{ width:7px; height:7px; border-radius:50%; display:inline-block; background: var(--ink-dim); }
+.status-dot.online{ background: var(--accent-2); box-shadow: 0 0 0 3px rgba(61,220,151,0.15); }
+.status-dot.offline{ background: var(--danger); box-shadow: 0 0 0 3px rgba(255,92,92,0.15); }
+
+/* stat ledger */
+.ledger{
+    grid-column: 1/-1;
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    border: 1px solid var(--border); border-radius: var(--radius); overflow:hidden;
+    background: var(--bg-alt);
+}
+.ledger-cell{
+    padding: 20px 22px; border-right: 1px solid var(--border);
+}
+.ledger-cell:last-child{ border-right:none; }
+.ledger-num{ font-family: var(--font-mono); font-size: 1.9rem; font-weight:700; color: var(--accent); }
+.ledger-label{ font-family: var(--font-mono); font-size: 0.68rem; letter-spacing:0.1em; text-transform:uppercase; color: var(--ink-dim); margin-top:4px; }
+
+/* cards */
+.card{
+    background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; box-shadow: var(--shadow);
+}
+.card h2{ font-family: var(--font-display); font-size: 1.3rem; font-weight:600; margin-bottom: 20px; }
+
+.field{ margin-bottom: 18px; }
+.field label{
+    display:block; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing:0.06em; text-transform:uppercase;
+    color: var(--ink-dim); margin-bottom: 8px;
+}
+.field label .req{ color: var(--danger); }
+input[type="tel"], textarea, select{
+    width:100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 0.95rem;
+    transition: border-color .2s ease;
+}
+input[type="tel"]:focus, textarea:focus, select:focus{ outline:none; border-color: var(--accent); }
+input.error, textarea.error, select.error{ border-color: var(--danger); }
+textarea{ min-height: 110px; resize: vertical; }
+select{ appearance:none; cursor:pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B9099' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position: right 14px center; padding-right: 36px;
+}
+.err-msg{ font-size: 0.76rem; color: var(--danger); margin-top:6px; display:none; }
+.err-msg.show{ display:block; }
+
+.btn-submit{
+    width:100%; padding: 15px; border-radius: 8px; border:none; cursor:pointer;
+    background: var(--accent); color: var(--accent-ink);
+    font-family: var(--font-mono); font-weight:700; font-size: 0.85rem; letter-spacing:0.05em; text-transform:uppercase;
+    transition: transform .15s ease;
+}
+.btn-submit:hover:not(:disabled){ transform: translateY(-2px); }
+.btn-submit:disabled{ opacity:0.55; cursor:not-allowed; }
+
+/* report output */
+.report-card{ position:relative; overflow:hidden; }
+.report-card .stamp{
+    position:absolute; top:26px; right:-38px; transform: rotate(38deg);
+    background: var(--accent-2); color: #05170F; font-family: var(--font-mono);
+    font-size: 0.68rem; letter-spacing:0.15em; text-transform:uppercase; font-weight:700;
+    padding: 4px 46px;
+}
+.report-id{
+    font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-dim); margin-bottom: 12px;
+}
+.report-output{
+    width:100%; min-height: 280px; padding:16px; border-radius:8px; border:1px solid var(--border);
+    background: var(--bg); color: var(--ink); font-family: var(--font-mono); font-size: 0.82rem; line-height:1.55;
+    resize: vertical;
+}
+.report-actions{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.action-btn{
+    flex:1; min-width:100px; padding: 10px 16px; border-radius:8px; border:1px solid var(--border);
+    background: var(--bg); color: var(--ink); font-family: var(--font-mono); font-size: 0.75rem;
+    letter-spacing:0.04em; text-transform:uppercase; cursor:pointer; transition: transform .15s ease;
+}
+.action-btn:hover{ transform: translateY(-2px); }
+
+/* recent reports */
+.recent{ grid-column: 1/-1; }
+.recent-list{ max-height: 320px; overflow-y:auto; }
+.recent-row{
+    display:grid; grid-template-columns: 1.2fr 1fr auto auto; gap: 14px; align-items:center;
+    padding: 13px 4px; border-bottom: 1px solid var(--border); font-size: 0.88rem;
+}
+.recent-row:last-child{ border-bottom:none; }
+.recent-row .phone{ font-family: var(--font-mono); color: var(--accent); }
+.recent-row .reason{ color: var(--ink-dim); }
+.recent-row .date{ color: var(--ink-dim); font-size:0.78rem; text-align:right; }
+.badge{ font-family: var(--font-mono); font-size:0.68rem; letter-spacing:0.06em; text-transform:uppercase;
+    padding: 3px 10px; border-radius:50px; white-space:nowrap; justify-self:start; }
+.badge.pending{ background: rgba(255,159,28,0.15); color: var(--accent); }
+.badge.resolved{ background: rgba(61,220,151,0.15); color: var(--accent-2); }
+.empty-note{ color: var(--ink-dim); text-align:center; padding: 30px 10px; font-size:0.9rem; }
+
+/* toast */
+.toast{
+    position: fixed; bottom: 26px; right: 26px; z-index: 600;
+    padding: 14px 22px; border-radius: 8px; font-family: var(--font-mono); font-size: 0.82rem;
+    color: var(--accent-ink); box-shadow: var(--shadow);
+    transform: translateY(120px); opacity:0; transition: all .3s ease;
+}
+.toast.show{ transform: translateY(0); opacity:1; }
+.toast.success{ background: var(--accent-2); color:#05170F; }
+.toast.error{ background: var(--danger); color:#2A0000; }
+.toast.info{ background: var(--ink); color: var(--bg); }
+
+.api-note{
+    position: fixed; bottom: 10px; left: 14px; font-family: var(--font-mono); font-size: 0.65rem;
+    color: var(--ink-dim); z-index: 50; opacity: 0.6;
+}
+
+@media (max-width: 900px){
+    .wrap{ grid-template-columns: 1fr; }
+    .masthead h1{ font-size: 1.8rem; }
+    .recent-row{ grid-template-columns: 1fr; text-align:left; }
+    .recent-row .date{ text-align:left; }
+}
+</style>
 </head>
 <body>
-    <div class="bg-animation"></div>
-    <div class="particles" id="particles"></div>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="header-section">
-            <h1 class="title">⚡ WhatsApp Report Assistant</h1>
-            <p class="subtitle">
-                By <span>Lord Diego</span> — The Father of Bans 👑
-                <span class="connection-status" id="connectionStatus">● Connecting...</span>
-            </p>
-            <div class="badge">⚡ Report & Conquer ⚡</div>
+<!-- ============ GUIDELINES GATE ============ -->
+<div class="gate" id="gate">
+    <div class="gate-card">
+        <div class="gate-eyebrow">Before you proceed</div>
+        <h1>Case Intake Guidelines</h1>
+        <div class="gate-terms">
+            This tool drafts WhatsApp violation reports for you to submit through WhatsApp's own reporting channel. By continuing, you agree to the following:
+            <ol>
+                <li><strong>Accuracy.</strong> Only report numbers and behavior you've genuinely observed. Don't file reports based on suspicion, rumor, or personal disputes.</li>
+                <li><strong>No harassment.</strong> This tool must not be used to target someone as a form of harassment, retaliation, or intimidation.</li>
+                <li><strong>Your data.</strong> Submitted reports (phone number, reason, description, and basic request metadata) are stored so we can track report volume and status.</li>
+                <li><strong>Final decisions rest with WhatsApp.</strong> This tool prepares a report for you — it does not ban, restrict, or contact anyone directly.</li>
+                <li><strong>Misuse.</strong> Repeated false or bad-faith reports may result in your access to this tool being revoked.</li>
+            </ol>
+            Please confirm you've read and agree to these terms before continuing.
         </div>
-
-        <!-- Stats -->
-        <div class="stats-section" id="statsContainer">
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-number" id="totalReports">0</div>
-                <div class="stat-label">Total Reports</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">📱</div>
-                <div class="stat-number" id="uniqueNumbers">0</div>
-                <div class="stat-label">Unique Numbers</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🔥</div>
-                <div class="stat-number" id="reportsToday">0</div>
-                <div class="stat-label">Reports Today</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🏆</div>
-                <div class="stat-number" id="banRate">0%</div>
-                <div class="stat-label">Ban Rate</div>
-            </div>
+        <div class="gate-actions">
+            <button class="gate-btn decline" id="declineBtn">Decline</button>
+            <button class="gate-btn accept" id="acceptBtn">Accept &amp; Continue</button>
         </div>
+    </div>
+</div>
 
-        <!-- Form -->
-        <div class="glass-card form-section">
-            <h2 style="margin-bottom: 20px;">📝 New Report</h2>
-            <form id="reportForm" novalidate>
-                <div class="form-group">
-                    <label for="phone">
-                        Phone Number <span class="required">*</span>
-                    </label>
-                    <input 
-                        type="tel" 
-                        id="phone" 
-                        name="phone" 
-                        placeholder="+1234567890" 
-                        required
-                        autocomplete="tel"
-                    >
-                    <div class="error-message" id="phoneError">Please enter a valid phone number</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reason">
-                        Reason <span class="required">*</span>
-                    </label>
-                    <select id="reason" name="reason" required>
-                        <option value="">Select a reason...</option>
-                        <option value="Spam">📨 Spam</option>
-                        <option value="Scam">🎣 Scam</option>
-                        <option value="Harassment">😤 Harassment</option>
-                        <option value="Impersonation">🎭 Impersonation</option>
-                        <option value="Other">❓ Other</option>
-                    </select>
-                    <div class="error-message" id="reasonError">Please select a reason</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="description">
-                        Description <span class="required">*</span>
-                    </label>
-                    <textarea 
-                        id="description" 
-                        name="description" 
-                        placeholder="Describe the violation in detail..."
-                        required
-                    ></textarea>
-                    <div class="error-message" id="descriptionError">Please provide a detailed description</div>
-                </div>
-                
-                <button type="submit" class="btn-submit" id="submitBtn">
-                    <span class="btn-text">⚡ Generate Report</span>
-                    <span class="loading-spinner">⏳</span>
-                </button>
-            </form>
+<!-- ============ DECLINED SCREEN ============ -->
+<div class="declined" id="declinedScreen" hidden>
+    <div class="declined-inner">
+        <div class="stamp">Access withheld</div>
+        <h2>You need to accept the guidelines to continue</h2>
+        <p>No report can be generated until the intake guidelines are accepted. You can review them again any time.</p>
+        <button id="reviewBtn">Review guidelines again</button>
+    </div>
+</div>
+
+<!-- ============ THEME TOGGLE ============ -->
+<button class="theme-toggle" id="themeToggle">🌙 <span id="themeLabel">Dark</span></button>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app" hidden>
+<div class="wrap">
+
+    <div class="masthead">
+        <h1>WhatsApp Report Assistant</h1>
+        <div class="tag"><span class="status-dot" id="statusDot"></span><span id="statusText">Connecting…</span></div>
+    </div>
+
+    <div class="ledger">
+        <div class="ledger-cell">
+            <div class="ledger-num" id="totalReports">0</div>
+            <div class="ledger-label">Total Reports</div>
         </div>
-
-        <!-- Report Output -->
-        <div class="glass-card report-section" id="reportSection" style="display: none;">
-            <h2 style="margin-bottom: 15px;">📄 Generated Report</h2>
-            <div style="margin-bottom: 10px; font-size: 0.9rem; color: #666;" id="reportIdDisplay"></div>
-            <textarea 
-                id="reportOutput" 
-                class="report-output" 
-                readonly
-                rows="15"
-            ></textarea>
-            <div class="report-actions">
-                <button class="btn-action btn-copy" id="copyBtn">📋 Copy</button>
-                <button class="btn-action btn-download" id="downloadBtn">💾 Download</button>
-                <button class="btn-action btn-clear" id="clearBtn">🗑️ Clear</button>
-            </div>
+        <div class="ledger-cell">
+            <div class="ledger-num" id="uniqueNumbers">0</div>
+            <div class="ledger-label">Unique Numbers</div>
         </div>
-
-        <!-- Recent Reports -->
-        <div class="glass-card recent-reports">
-            <h2 style="margin-bottom: 15px;">🕒 Recent Reports</h2>
-            <div class="reports-list" id="recentReportsList">
-                <p style="color: #999; text-align: center; padding: 20px;">Loading reports...</p>
-            </div>
+        <div class="ledger-cell">
+            <div class="ledger-num" id="reportsToday">0</div>
+            <div class="ledger-label">Reports Today</div>
+        </div>
+        <div class="ledger-cell">
+            <div class="ledger-num" id="banRate">0%</div>
+            <div class="ledger-label">Ban Rate</div>
         </div>
     </div>
 
-    <div class="toast" id="toast"></div>
-    <div class="api-info" id="apiInfo">API: Loading...</div>
+    <div class="card" style="grid-column:1;">
+        <h2>New Case</h2>
+        <form id="reportForm" novalidate>
+            <div class="field">
+                <label for="phone">Phone Number <span class="req">*</span></label>
+                <input type="tel" id="phone" name="phone" placeholder="+1234567890" required autocomplete="tel">
+                <div class="err-msg" id="phoneError">Please enter a valid phone number</div>
+            </div>
+            <div class="field">
+                <label for="reason">Reason <span class="req">*</span></label>
+                <select id="reason" name="reason" required>
+                    <option value="">Select a reason…</option>
+                    <option value="Spam">Spam</option>
+                    <option value="Scam">Scam</option>
+                    <option value="Harassment">Harassment</option>
+                    <option value="Impersonation">Impersonation</option>
+                    <option value="Other">Other</option>
+                </select>
+                <div class="err-msg" id="reasonError">Please select a reason</div>
+            </div>
+            <div class="field">
+                <label for="description">Description <span class="req">*</span></label>
+                <textarea id="description" name="description" placeholder="Describe the violation in detail…" required></textarea>
+                <div class="err-msg" id="descriptionError">Please provide a detailed description</div>
+            </div>
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span class="btn-text">Generate Report</span>
+            </button>
+        </form>
+    </div>
 
-    <script>
-        // ============================================
-        // CONFIGURATION - Backend API URL
-        // ============================================
-        const CONFIG = {
-            // Your Render backend URL
-            API_URL: 'https://wa-reporter-jo98.onrender.com',
-            
-            endpoints: {
-                stats: '/api/stats',
-                generateReport: '/api/generate-report',
-                validatePhone: '/api/validate-phone',
-                recentReports: '/api/recent-reports',
-                health: '/api/health'
-            }
-        };
+    <div class="card report-card" id="reportSection" style="grid-column:2; display:none;">
+        <div class="stamp">Filed</div>
+        <h2>Generated Report</h2>
+        <div class="report-id" id="reportIdDisplay"></div>
+        <textarea id="reportOutput" class="report-output" readonly rows="14"></textarea>
+        <div class="report-actions">
+            <button class="action-btn" id="copyBtn">Copy</button>
+            <button class="action-btn" id="downloadBtn">Download</button>
+            <button class="action-btn" id="clearBtn">Clear</button>
+        </div>
+    </div>
 
-        const API_URL = CONFIG.API_URL;
+    <div class="card recent">
+        <h2>Recent Reports</h2>
+        <div class="recent-list" id="recentReportsList">
+            <p class="empty-note">Loading reports…</p>
+        </div>
+    </div>
 
-        // Display API URL in footer
-        document.getElementById('apiInfo').textContent = `API: ${API_URL}`;
+</div>
+</div>
 
-        // ============================================
-        // APPLICATION CODE
-        // ============================================
+<div class="toast" id="toast"></div>
+<div class="api-note" id="apiInfo">API: loading…</div>
 
-        // Particle background
-        (function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 30; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (15 + Math.random() * 30) + 's';
-                particle.style.animationDelay = (Math.random() * 30) + 's';
-                particle.style.width = (2 + Math.random() * 4) + 'px';
-                particle.style.height = particle.style.width;
-                container.appendChild(particle);
-            }
-        })();
+<script>
+// ============================================
+// GATE LOGIC
+// ============================================
+const gate = document.getElementById('gate');
+const declinedScreen = document.getElementById('declinedScreen');
+const app = document.getElementById('app');
 
-        // Toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = 'toast ' + type + ' show';
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
+document.getElementById('acceptBtn').addEventListener('click', () => {
+    gate.remove();
+    app.hidden = false;
+    init();
+});
 
-        // Update connection status
-        function updateConnectionStatus(online) {
-            const status = document.getElementById('connectionStatus');
-            if (online) {
-                status.textContent = '● Online';
-                status.className = 'connection-status online';
-            } else {
-                status.textContent = '● Offline';
-                status.className = 'connection-status offline';
-            }
-        }
+document.getElementById('declineBtn').addEventListener('click', () => {
+    gate.hidden = true;
+    declinedScreen.hidden = false;
+});
 
-        // Check backend health
-        async function checkHealth() {
-            try {
-                const response = await fetch(`${API_URL}${CONFIG.endpoints.health}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                if (response.ok) {
-                    updateConnectionStatus(true);
-                    return true;
-                }
-                throw new Error('Health check failed');
-            } catch (error) {
-                console.error('Health check failed:', error);
-                updateConnectionStatus(false);
-                return false;
-            }
-        }
+document.getElementById('reviewBtn').addEventListener('click', () => {
+    declinedScreen.hidden = true;
+    gate.hidden = false;
+});
 
-        // Load stats
-        async function loadStats() {
-            try {
-                const response = await fetch(`${API_URL}${CONFIG.endpoints.stats}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    document.getElementById('totalReports').textContent = data.stats.total_reports || 0;
-                    document.getElementById('uniqueNumbers').textContent = data.stats.unique_numbers || 0;
-                    document.getElementById('reportsToday').textContent = data.stats.reports_today || 0;
-                    
-                    // Ban rate calculation
-                    const rate = data.stats.total_reports > 0 
-                        ? Math.min(100, Math.round((data.stats.unique_numbers / data.stats.total_reports) * 100))
-                        : 0;
-                    document.getElementById('banRate').textContent = rate + '%';
-                    
-                    // Update recent reports
-                    updateRecentReports(data.recentReports);
-                    updateConnectionStatus(true);
-                    return true;
-                }
-                return false;
-            } catch (error) {
-                console.error('Error loading stats:', error);
-                updateConnectionStatus(false);
-                return false;
-            }
-        }
+// ============================================
+// THEME TOGGLE (in-memory only — no storage APIs)
+// ============================================
+const themeToggle = document.getElementById('themeToggle');
+const themeLabel = document.getElementById('themeLabel');
+themeToggle.addEventListener('click', () => {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    themeToggle.firstChild.textContent = isDark ? '☀️ ' : '🌙 ';
+    themeLabel.textContent = isDark ? 'Light' : 'Dark';
+});
 
-        function updateRecentReports(reports) {
-            const container = document.getElementById('recentReportsList');
-            if (!reports || reports.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No reports yet. Be the first! 🚀</p>';
-                return;
-            }
-            
-            container.innerHTML = reports.map(report => `
-                <div class="report-item">
-                    <span class="phone">📱 ${report.phone_number}</span>
-                    <span class="reason">${report.reason}</span>
-                    <span class="status-badge status-${report.status || 'pending'}">${report.status || 'Pending'}</span>
-                    <span class="date">${new Date(report.created_at).toLocaleString()}</span>
-                </div>
-            `).join('');
-        }
+// ============================================
+// CONFIG
+// ============================================
+const CONFIG = {
+    API_URL: 'https://wa-reporter-jo98.onrender.com',
+    endpoints: {
+        stats: '/api/stats',
+        generateReport: '/api/generate-report',
+        validatePhone: '/api/validate-phone',
+        recentReports: '/api/recent-reports',
+        health: '/api/health'
+    }
+};
+const API_URL = CONFIG.API_URL;
+document.getElementById('apiInfo').textContent = `API: ${API_URL}`;
 
-        // Form handling
-        const form = document.getElementById('reportForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const reportSection = document.getElementById('reportSection');
-        const reportOutput = document.getElementById('reportOutput');
-        const reportIdDisplay = document.getElementById('reportIdDisplay');
-        const copyBtn = document.getElementById('copyBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const clearBtn = document.getElementById('clearBtn');
+// ============================================
+// APP LOGIC
+// ============================================
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+}
 
-        const phoneInput = document.getElementById('phone');
-        const reasonSelect = document.getElementById('reason');
-        const descriptionInput = document.getElementById('description');
+function updateConnectionStatus(online) {
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    dot.className = 'status-dot ' + (online ? 'online' : 'offline');
+    text.textContent = online ? 'Online' : 'Offline';
+}
 
-        const phoneError = document.getElementById('phoneError');
-        const reasonError = document.getElementById('reasonError');
-        const descriptionError = document.getElementById('descriptionError');
-
-        let currentReportId = '';
-
-        function validatePhone(phone) {
-            const cleaned = phone.replace(/\D/g, '');
-            return cleaned.length >= 10 && cleaned.length <= 15;
-        }
-
-        function validateField(input, errorElement, validator, errorMessage) {
-            const value = input.value.trim();
-            if (!value || !validator(value)) {
-                errorElement.textContent = errorMessage;
-                errorElement.classList.add('show');
-                input.classList.add('error');
-                return false;
-            } else {
-                errorElement.classList.remove('show');
-                input.classList.remove('error');
-                return true;
-            }
-        }
-
-        // Real-time validation
-        phoneInput.addEventListener('blur', function() {
-            validateField(this, phoneError, validatePhone, 'Please enter a valid phone number (10-15 digits)');
+async function checkHealth() {
+    try {
+        const response = await fetch(`${API_URL}${CONFIG.endpoints.health}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
         });
+        if (response.ok) { updateConnectionStatus(true); return true; }
+        throw new Error('Health check failed');
+    } catch (error) {
+        console.error('Health check failed:', error);
+        updateConnectionStatus(false);
+        return false;
+    }
+}
 
-        phoneInput.addEventListener('input', function() {
-            if (this.value.trim()) {
-                phoneError.classList.remove('show');
-                this.classList.remove('error');
-            }
-        });
-
-        reasonSelect.addEventListener('change', function() {
-            if (this.value) {
-                reasonError.classList.remove('show');
-                this.classList.remove('error');
-            }
-        });
-
-        descriptionInput.addEventListener('input', function() {
-            if (this.value.trim().length >= 10) {
-                descriptionError.classList.remove('show');
-                this.classList.remove('error');
-            }
-        });
-
-        // Form submission
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const isPhoneValid = validateField(phoneInput, phoneError, validatePhone, 'Please enter a valid phone number (10-15 digits)');
-            const isReasonValid = validateField(reasonSelect, reasonError, (v) => v !== '', 'Please select a reason');
-            const isDescriptionValid = validateField(descriptionInput, descriptionError, (v) => v.length >= 10, 'Please provide a detailed description (minimum 10 characters)');
-            
-            if (!isPhoneValid || !isReasonValid || !isDescriptionValid) {
-                showToast('Please fix all errors before submitting', 'error');
-                return;
-            }
-
-            const phone = phoneInput.value.trim();
-            const reason = reasonSelect.value;
-            const description = descriptionInput.value.trim();
-
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-            submitBtn.querySelector('.btn-text').textContent = 'Generating...';
-
-            try {
-                const response = await fetch(`${API_URL}${CONFIG.endpoints.generateReport}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, reason, description })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    reportOutput.value = data.report;
-                    currentReportId = data.reportId || '';
-                    reportIdDisplay.textContent = `📌 Report ID: ${currentReportId}`;
-                    reportSection.style.display = 'block';
-                    reportSection.classList.add('show');
-                    
-                    showToast('✅ Report generated successfully!', 'success');
-                    loadStats(); // Refresh stats
-                    
-                    // Clear form
-                    form.reset();
-                    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-                } else {
-                    const errorMsg = data.errors ? data.errors.join(', ') : (data.error || 'Failed to generate report');
-                    showToast('❌ ' + errorMsg, 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('❌ Network error. Please try again.', 'error');
-                updateConnectionStatus(false);
-            } finally {
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
-                submitBtn.querySelector('.btn-text').textContent = '⚡ Generate Report';
-            }
-        });
-
-        // Copy report
-        copyBtn.addEventListener('click', async function() {
-            const text = reportOutput.value;
-            if (!text) return;
-            
-            try {
-                await navigator.clipboard.writeText(text);
-                showToast('✅ Report copied to clipboard!', 'success');
-            } catch (err) {
-                reportOutput.select();
-                document.execCommand('copy');
-                showToast('✅ Report copied to clipboard!', 'success');
-            }
-        });
-
-        // Download report
-        downloadBtn.addEventListener('click', function() {
-            const text = reportOutput.value;
-            if (!text) return;
-            
-            const blob = new Blob([text], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `whatsapp-report-${currentReportId || Date.now()}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('✅ Report downloaded successfully!', 'success');
-        });
-
-        // Clear report
-        clearBtn.addEventListener('click', function() {
-            reportOutput.value = '';
-            reportSection.style.display = 'none';
-            reportIdDisplay.textContent = '';
-            showToast('🗑️ Report cleared', 'info');
-        });
-
-        // Initialize
-        async function init() {
-            // Check health first
-            const isHealthy = await checkHealth();
-            if (isHealthy) {
-                await loadStats();
-            } else {
-                document.getElementById('recentReportsList').innerHTML = 
-                    '<p style="color: #999; text-align: center; padding: 20px;">⚠️ Cannot connect to backend. Please check your API URL.</p>';
-                showToast('⚠️ Cannot connect to backend. Check API URL.', 'error');
-            }
-            
-            // Auto-refresh stats every 30 seconds
-            setInterval(async () => {
-                await checkHealth();
-                if (document.getElementById('connectionStatus').classList.contains('online')) {
-                    await loadStats();
-                }
-            }, 30000);
+async function loadStats() {
+    try {
+        const response = await fetch(`${API_URL}${CONFIG.endpoints.stats}`);
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('totalReports').textContent = data.stats.total_reports || 0;
+            document.getElementById('uniqueNumbers').textContent = data.stats.unique_numbers || 0;
+            document.getElementById('reportsToday').textContent = data.stats.reports_today || 0;
+            const rate = data.stats.total_reports > 0
+                ? Math.min(100, Math.round((data.stats.unique_numbers / data.stats.total_reports) * 100))
+                : 0;
+            document.getElementById('banRate').textContent = rate + '%';
+            updateRecentReports(data.recentReports);
+            updateConnectionStatus(true);
+            return true;
         }
+        return false;
+    } catch (error) {
+        console.error('Error loading stats:', error);
+        updateConnectionStatus(false);
+        return false;
+    }
+}
 
-        // Start the application
-        init();
-    </script>
+function updateRecentReports(reports) {
+    const container = document.getElementById('recentReportsList');
+    if (!reports || reports.length === 0) {
+        container.innerHTML = '<p class="empty-note">No reports yet.</p>';
+        return;
+    }
+    container.innerHTML = reports.map(report => `
+        <div class="recent-row">
+            <span class="phone">${report.phone_number}</span>
+            <span class="reason">${report.reason}</span>
+            <span class="badge ${report.status || 'pending'}">${report.status || 'Pending'}</span>
+            <span class="date">${new Date(report.created_at).toLocaleString()}</span>
+        </div>
+    `).join('');
+}
+
+const form = document.getElementById('reportForm');
+const submitBtn = document.getElementById('submitBtn');
+const reportSection = document.getElementById('reportSection');
+const reportOutput = document.getElementById('reportOutput');
+const reportIdDisplay = document.getElementById('reportIdDisplay');
+const copyBtn = document.getElementById('copyBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+const phoneInput = document.getElementById('phone');
+const reasonSelect = document.getElementById('reason');
+const descriptionInput = document.getElementById('description');
+
+const phoneError = document.getElementById('phoneError');
+const reasonError = document.getElementById('reasonError');
+const descriptionError = document.getElementById('descriptionError');
+
+let currentReportId = '';
+
+function validatePhone(phone) {
+    const cleaned = phone.replace(/\D/g, '');
+    return cleaned.length >= 10 && cleaned.length <= 15;
+}
+
+function validateField(input, errorElement, validator, errorMessage) {
+    const value = input.value.trim();
+    if (!value || !validator(value)) {
+        errorElement.textContent = errorMessage;
+        errorElement.classList.add('show');
+        input.classList.add('error');
+        return false;
+    } else {
+        errorElement.classList.remove('show');
+        input.classList.remove('error');
+        return true;
+    }
+}
+
+phoneInput.addEventListener('blur', function() {
+    validateField(this, phoneError, validatePhone, 'Please enter a valid phone number (10-15 digits)');
+});
+phoneInput.addEventListener('input', function() {
+    if (this.value.trim()) { phoneError.classList.remove('show'); this.classList.remove('error'); }
+});
+reasonSelect.addEventListener('change', function() {
+    if (this.value) { reasonError.classList.remove('show'); this.classList.remove('error'); }
+});
+descriptionInput.addEventListener('input', function() {
+    if (this.value.trim().length >= 10) { descriptionError.classList.remove('show'); this.classList.remove('error'); }
+});
+
+form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const isPhoneValid = validateField(phoneInput, phoneError, validatePhone, 'Please enter a valid phone number (10-15 digits)');
+    const isReasonValid = validateField(reasonSelect, reasonError, (v) => v !== '', 'Please select a reason');
+    const isDescriptionValid = validateField(descriptionInput, descriptionError, (v) => v.length >= 10, 'Please provide a detailed description (minimum 10 characters)');
+
+    if (!isPhoneValid || !isReasonValid || !isDescriptionValid) {
+        showToast('Please fix all errors before submitting', 'error');
+        return;
+    }
+
+    const phone = phoneInput.value.trim();
+    const reason = reasonSelect.value;
+    const description = descriptionInput.value.trim();
+
+    submitBtn.disabled = true;
+    submitBtn.querySelector('.btn-text').textContent = 'Generating…';
+
+    try {
+        const response = await fetch(`${API_URL}${CONFIG.endpoints.generateReport}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, reason, description })
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            reportOutput.value = data.report;
+            currentReportId = data.reportId || '';
+            reportIdDisplay.textContent = `Case ID: ${currentReportId}`;
+            reportSection.style.display = 'block';
+            showToast('Report generated successfully', 'success');
+            loadStats();
+            form.reset();
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+        } else {
+            const errorMsg = data.errors ? data.errors.join(', ') : (data.error || 'Failed to generate report');
+            showToast(errorMsg, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Network error. Please try again.', 'error');
+        updateConnectionStatus(false);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('.btn-text').textContent = 'Generate Report';
+    }
+});
+
+copyBtn.addEventListener('click', async function() {
+    const text = reportOutput.value;
+    if (!text) return;
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast('Report copied to clipboard', 'success');
+    } catch (err) {
+        reportOutput.select();
+        document.execCommand('copy');
+        showToast('Report copied to clipboard', 'success');
+    }
+});
+
+downloadBtn.addEventListener('click', function() {
+    const text = reportOutput.value;
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `whatsapp-report-${currentReportId || Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Report downloaded', 'success');
+});
+
+clearBtn.addEventListener('click', function() {
+    reportOutput.value = '';
+    reportSection.style.display = 'none';
+    reportIdDisplay.textContent = '';
+    showToast('Report cleared', 'info');
+});
+
+async function init() {
+    const isHealthy = await checkHealth();
+    if (isHealthy) {
+        await loadStats();
+    } else {
+        document.getElementById('recentReportsList').innerHTML =
+            '<p class="empty-note">Cannot connect to backend. Check your API URL.</p>';
+        showToast('Cannot connect to backend', 'error');
+    }
+    setInterval(async () => {
+        await checkHealth();
+        if (document.getElementById('statusText').textContent === 'Online') {
+            await loadStats();
+        }
+    }, 30000);
+}
+</script>
 </body>
 </html>
