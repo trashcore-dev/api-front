@@ -945,8 +945,8 @@ footer strong{color:var(--text2)}
     <div class="sec-title">Up and Running in 2 Minutes</div>
     <div class="install-step"><div class="step-num">1</div><div style="flex:1"><div class="step-title">Install Dependencies</div><div class="code-line"><span>npm install express cors @trashcore/trash-api multer</span><button class="copy-sm" onclick="copyLine(this,'npm install express cors @trashcore/trash-api multer')">copy</button></div></div></div>
     <div class="install-step"><div class="step-num">2</div><div style="flex:1"><div class="step-title">Start the Server</div><div class="code-line"><span>node server.js</span><button class="copy-sm" onclick="copyLine(this,'node server.js')">copy</button></div></div></div>
-    <div class="install-step"><div class="step-num">3</div><div style="flex:1"><div class="step-title">Test a Route</div><div class="code-line"><span>/tools/weather?city=London</span><button class="copy-sm" onclick="copyLine(this,API_BASE_URL+'/tools/weather?city=London')">copy</button></div></div></div>
-    <div class="install-step"><div class="step-num">4</div><div style="flex:1"><div class="step-title">Try AI Chat</div><div class="code-line"><span>/ai/gpt?prompt=Hello+world</span><button class="copy-sm" onclick="copyLine(this,API_BASE_URL+'/ai/gpt?prompt=Hello+world')">copy</button></div></div></div>
+    <div class="install-step"><div class="step-num">3</div><div style="flex:1"><div class="step-title">Test a Route</div><div class="code-line"><span>/tools/weather?city=London</span><button class="copy-sm" onclick="copyLine(this,'https://apis-production-828f.up.railway.app/tools/weather?city=London')">copy</button></div></div></div>
+    <div class="install-step"><div class="step-num">4</div><div style="flex:1"><div class="step-title">Try AI Chat</div><div class="code-line"><span>/ai/gpt?prompt=Hello+world</span><button class="copy-sm" onclick="copyLine(this,'https://apis-production-828f.up.railway.app/ai/gpt?prompt=Hello+world')">copy</button></div></div></div>
   </div>
 
   <div class="section" id="pricing">
@@ -1077,18 +1077,11 @@ footer strong{color:var(--text2)}
 
 <script>
 // ══════════════════════════════════════════════════════════
-//  API CONFIG — points at your backend (Railway/Render/etc.)
-// ══════════════════════════════════════════════════════════
-const API_BASE_URL = 'https://apis-production-828f.up.railway.app'
-
-// ══════════════════════════════════════════════════════════
 //  THEME
 // ══════════════════════════════════════════════════════════
 (function initTheme(){
-  try{
-    const saved = localStorage.getItem('tc-api-theme')
-    if(saved==='light') applyTheme('light', false)
-  }catch(e){ /* localStorage blocked (e.g. file:// preview) — ignore */ }
+  const saved = localStorage.getItem('tc-api-theme')
+  if(saved==='light') applyTheme('light', false)
 })()
 
 function applyTheme(mode, animate){
@@ -1101,13 +1094,13 @@ function applyTheme(mode, animate){
     if(navBtn) navBtn.textContent='☀️'
     if(drawerIcon) drawerIcon.textContent='🌙'
     if(drawerLabel) drawerLabel.textContent='Dark Mode'
-    try{ localStorage.setItem('tc-api-theme','light') }catch(e){}
+    localStorage.setItem('tc-api-theme','light')
   } else {
     html.removeAttribute('data-theme')
     if(navBtn) navBtn.textContent='🌙'
     if(drawerIcon) drawerIcon.textContent='☀️'
     if(drawerLabel) drawerLabel.textContent='Light Mode'
-    try{ localStorage.setItem('tc-api-theme','dark') }catch(e){}
+    localStorage.setItem('tc-api-theme','dark')
   }
   if(animate && navBtn){
     navBtn.style.transform='rotate(360deg)'
@@ -1124,7 +1117,7 @@ function toggleTheme(){
 //  AI ASSISTANT
 // ══════════════════════════════════════════════════════════
 const AI_KB = [
-  {keys:['call','endpoint','use','how','request','fetch','make'],answer:'To call an endpoint, make a GET request to:<br><code>'+API_BASE_URL+'/[path]?param=value</code><br>No API key needed! Example:<br><code>/tools/weather?city=London</code>'},
+  {keys:['call','endpoint','use','how','request','fetch','make'],answer:'To call an endpoint, make a GET request to:<br><code>https://your-server.com/[path]?param=value</code><br>No API key needed! Example:<br><code>/tools/weather?city=London</code>'},
   {keys:['ai','model','gpt','llama','groq','claude','perplexity','openai'],answer:'Supported AI models: <strong>GPT-4o-mini</strong>, <strong>o3-mini</strong>, <strong>Groq Llama 3.3 70B</strong>, <strong>Google Gemini</strong> (multi-turn), <strong>Pollinations</strong>, <strong>Perplexity</strong> (turbo/sonar), <strong>Claude</strong>, <strong>DeepSeek</strong>, <strong>Flux image gen</strong>, <strong>Whisper STT</strong>, and <strong>TTS</strong> with 6 voices.'},
   {keys:['rate limit','limit','throttle','quota'],answer:'✅ <strong>No rate limits.</strong> Zero throttling, zero API keys, zero auth. Make as many requests as you want, completely free.'},
   {keys:['contact','support','help','whatsapp','telegram','reach'],answer:'Reach the Trashcore team on:<br>• <strong>WhatsApp:</strong> +254 787 909 276<br>• <strong>Telegram:</strong> @trashcoredev2<br>Use the menu (top-left) for quick links!'},
@@ -1259,7 +1252,7 @@ detectBrowser()
 async function measurePing(){
   const t=Date.now()
   try{
-    await fetch(API_BASE_URL+'/ping?_='+t,{cache:'no-store'})
+    await fetch("https://apis-production-828f.up.railway.app"+'/ping?_='+t,{cache:'no-store'})
     setPing(Date.now()-t)
   }catch{
     try{ const t2=Date.now(); await fetch('https://api.ipify.org?format=json',{cache:'no-store'}); setPing(Date.now()-t2) }
@@ -1313,67 +1306,11 @@ async function getBattery(){
 // ══════════════════════════════════════════════════════════
 //  LOADING SCREEN — Spinner (10 seconds)
 // ══════════════════════════════════════════════════════════
-const LD_DURATION = 3000
-const LD_CIRCUMFERENCE = 2 * Math.PI * 52  // 326.73
-
-const ldArc = document.getElementById('ld-arc')
-const ldPctLabel = document.getElementById('ld-pct-label')
-const ldStatusText = document.getElementById('ld-status-text')
-const ldMetaPct = document.getElementById('lm-pct')
-const ldMetaTime = document.getElementById('lm-time')
-const ldMetaStatus = document.getElementById('lm-status')
-
-ldArc.style.strokeDasharray = LD_CIRCUMFERENCE
-ldArc.style.strokeDashoffset = LD_CIRCUMFERENCE
-
-const LD_STATUS_MSGS = [
-  {at:0,    text:'Initializing <span>runtime environment</span>...'},
-  {at:600,  text:'Establishing <span>secure connection</span>...'},
-  {at:1200, text:'Fetching <span>endpoint registry</span>...'},
-  {at:1800, text:'Loading <span>session data</span>...'},
-  {at:2400, text:'Rendering <span>documentation</span>...'},
-]
-
-LD_STATUS_MSGS.forEach(m=>{ setTimeout(()=>{ ldStatusText.innerHTML=m.text },m.at) })
-
-const ldStart = Date.now()
-
-// Use setInterval instead of requestAnimationFrame so progress
-// keeps moving even when the tab is backgrounded or throttled on mobile.
-const ldSpinnerInterval = setInterval(()=>{
-  const elapsed = Date.now() - ldStart
-  const pct = Math.min(100, Math.round((elapsed/LD_DURATION)*100))
-  const offset = LD_CIRCUMFERENCE - (pct/100)*LD_CIRCUMFERENCE
-  ldArc.style.strokeDashoffset = offset
-  ldPctLabel.textContent = pct+'%'
-  if(ldMetaPct) ldMetaPct.textContent = pct+'%'
-  if(pct>=100) clearInterval(ldSpinnerInterval)
-}, 30)
-
-const ldElTimer = setInterval(()=>{
-  const s = Math.round((Date.now()-ldStart)/1000)
-  if(ldMetaTime) ldMetaTime.textContent=s+'s'
-},500)
-
-// measure ping during load
-setTimeout(()=>{
-  const pt=Date.now()
-  fetch('https://api.ipify.org?format=json',{cache:'no-store'}).then(()=>{
-    const ms=Date.now()-pt
-    if(ldMetaStatus) ldMetaStatus.textContent='ONLINE'
-    setPing(ms)
-  }).catch(()=>{ if(ldMetaStatus) ldMetaStatus.textContent='ONLINE' })
-},1000)
-
-setTimeout(()=>{
-  clearInterval(ldElTimer)
-  if(ldMetaStatus) ldMetaStatus.textContent='READY'
-  renderCats()
-  fetchIP(); getBattery(); measurePing()
+// Loader dismissed immediately — no spinner
+;(function(){
   const loader = document.getElementById('loader')
-  loader.classList.add('fade-out')
-  setTimeout(()=>{ loader.style.display='none' },600)
-}, LD_DURATION)
+  if(loader) loader.style.display='none'
+})()
 
 // ══════════════════════════════════════════════════════════
 //  BROWSE OVERLAY — unchanged
@@ -1511,4 +1448,213 @@ const CATS=[
   {id:'nsfw',name:'NSFW',count:4,desc:'Adult content scrapers — XNXX and Xvideos search and video metadata (18+ only)',eps:[
     {name:'XNXX Search',path:'/nsfw/sxnxx',desc:'Search XNXX and return video results.',params:[{n:'q',req:1,ph:'search query'}],ex:'"result":[{"title":"...","link":"https://www.xnxx.com/video-..."}]'},
     {name:'XNXX Video Info',path:'/nsfw/xnxx',desc:'Scrape metadata and download URL from an XNXX video page.',params:[{n:'url',req:1,ph:'https://www.xnxx.com/video-...'}],ex:'"title":"...","duration":"12 min","url_dl":"https://..."'},
-    
+    {name:'Xvideos Search',path:'/nsfw/sxvideos',desc:'Search Xvideos.',params:[{n:'q',req:1,ph:'search query'}],ex:'[{"title":"...","duration":"10:32","quality":"HD"}]'},
+    {name:'Xvideos Video Info',path:'/nsfw/xvideos',desc:'Scrape metadata from an Xvideos video page.',params:[{n:'url',req:1,ph:'https://www.xvideos.com/video...'}],ex:'"title":"...","views":"1.2M","url_dl":"https://..."'}
+  ]},
+  {id:'ai',name:'AI',count:18,desc:'GPT-4o-mini, o3-mini, Groq Llama, Pollinations, Perplexity, DeepSeek, Claude, Flux, TTS, Whisper',eps:[
+    {name:'GPT-4o Mini Chat',path:'/ai/gpt',desc:'Chat with GPT-4o-mini.',params:[{n:'prompt',req:1,ph:'What is the capital of France?'},{n:'system',req:0,ph:'You are a helpful assistant.'}],ex:'"response":"The capital of France is Paris."'},
+    {name:'o3-mini Chat',path:'/ai/o3',desc:'Chat with o3-mini reasoning model.',params:[{n:'prompt',req:1,ph:'Solve: 2x + 5 = 11'},{n:'system',req:0,ph:'You are a math tutor.'}],ex:'"response":"x = 3."'},
+    {name:'Groq Llama',path:'/ai/groq',desc:'Chat with Llama 3.3 70B via Groq.',params:[{n:'q',req:1,ph:'Tell me a joke'},{n:'model',req:0,ph:'llama-3.3-70b-versatile',select:['llama-3.3-70b-versatile','llama-3.1-8b-instant','mixtral-8x7b-32768','gemma2-9b-it']}],ex:'"response":"Why do programmers prefer dark mode? Light attracts bugs!"'},
+    {name:'Pollinations AI',path:'/ai/openai',desc:'Chat via Pollinations.',params:[{n:'prompt',req:1,ph:'Explain quantum computing simply'}],ex:'"response":"Imagine a magic coin..."'},
+    {name:'Compound Search AI',path:'/ai/compound',desc:'AI with real-time web search.',params:[{n:'q',req:1,ph:'Latest Node.js version?'}],ex:'"response":"As of today, the latest LTS version of Node.js is v22.x..."'},
+    {name:'Perplexity Search',path:'/ai/perplexity',desc:'AI-powered web search via Perplexity.',params:[{n:'q',req:1,ph:'What is the latest version of Node.js?'},{n:'mode',req:0,ph:'concise',select:['concise','copilot']},{n:'model',req:0,ph:'turbo',select:['turbo','claude-3-5-sonnet','gpt-4o','gpt-4o-mini','sonar']},{n:'focus',req:0,ph:'internet',select:['internet','news','scholar','youtube','reddit']}],ex:'{"answer":"The latest LTS version of Node.js is v22.x..."}'},
+    {name:'Perplexity News',path:'/ai/perplexity/news',desc:'Perplexity pre-focused on news sources.',params:[{n:'q',req:1,ph:'Latest AI news today'}],ex:'{"answer":"Today in AI: ...","sources":[...]}'},
+    {name:'Text to Speech',path:'/ai/tts',desc:'Convert text to speech. Returns a hosted WAV URL.',params:[{n:'text',req:1,ph:'Hello from Trashcore!'},{n:'voice',req:0,ph:'tara',select:['tara','autumn','liam','emma','ethan','sophia']}],ex:'"voice":"tara","format":"wav","url":"https://...","expires_in":"10 minutes"'},
+    {name:'TTS Voices List',path:'/ai/tts/voices',desc:'List all available TTS voices.',params:[],ex:'"voices":["tara","autumn","liam","emma","ethan","sophia"]'},
+    {name:'Whisper STT (URL)',path:'/ai/whisper',desc:'Transcribe audio from a URL using Whisper.',params:[{n:'url',req:1,ph:'https://example.com/audio.mp3'},{n:'model',req:0,ph:'whisper-large-v3-turbo'}],ex:'"text":"Hello world.","language":"en"'},
+    {name:'Whisper STT (Upload)',path:'/ai/whisper',desc:'Transcribe by uploading an audio file.',params:[],method:'POST',isUpload:true,ex:'"text":"Transcribed text here.","language":"en"'},
+    {name:'Claude AI',path:'/ai/claude',desc:'Chat with Claude via the claude.ai web API.',params:[{n:'q',req:1,ph:'Write me a poem'},{n:'cookie',req:1,ph:'sessionKey=sk-ant-...'},{n:'orgId',req:1,ph:'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'},{n:'model',req:0,ph:'claude-sonnet-4-6'}],ex:'{"text":"Here is a poem..."}'},
+    {name:'Gemini AI',path:'/ai/gemini',desc:'Chat with Google Gemini. Pass sessionId to continue a multi-turn conversation.',params:[{n:'q',req:1,ph:'Explain quantum computing simply'},{n:'sessionId',req:0,ph:'abc-123 (continue session)'}],ex:'{"response":"Quantum computing uses qubits...","sessionId":"abc-123"}'},
+    {name:'DeepSeek AI',path:'/ai/deepseek',desc:'Chat with DeepSeek. Supports thinking mode for step-by-step reasoning.',params:[{n:'q',req:1,ph:'Explain black holes simply'},{n:'model',req:0,ph:'deepseek-v4-flash'},{n:'thinking',req:0,ph:'false',select:['false','true']}],ex:'{"response":"Black holes are regions of spacetime where gravity is so strong..."}'},
+    {name:'Scite AI (Scientific)',path:'/ai/scite',desc:'Ask scientific questions, get answers with citations.',params:[{n:'q',req:1,ph:'Effects of caffeine on sleep?'}],ex:'{"response":"Caffeine blocks adenosine receptors...","citations":[...]}'},
+    {name:'Flux Image Generation',path:'/ai/flux',desc:'Generate AI images using Flux via Pollinations.',params:[{n:'prompt',req:1,ph:'sunset over mountains, cinematic'},{n:'width',req:0,ph:'1024'},{n:'height',req:0,ph:'1024'},{n:'seed',req:0,ph:'42'}],ex:'{"url":"https://image.pollinations.ai/...","width":1024,"height":1024}'},
+    {name:'Universal Chat',path:'/ai/chat',desc:'Generic chat endpoint. Choose any supported model.',params:[{n:'prompt',req:1,ph:'Write a haiku about APIs'},{n:'model',req:0,ph:'gpt-4o-mini',select:['gpt-4o-mini','o3-mini','claude-3-haiku']},{n:'system',req:0,ph:'You are a creative poet.'}],ex:'"response":"Data flows like streams..."'},
+    {name:'Compound AI',path:'/ai/compound',desc:'AI + web search combined.',params:[{n:'q',req:1,ph:'Who won the last World Cup?'}],ex:'"response":"Argentina won..."'}
+  ]},
+  (()=>{
+    const NK=['woof','8ball','goose','gecg','feed','avatar','fox_girl','lizard','spank','meow','tickle']
+    const WF=['cry','hug','pat','kiss','slap','blush','smug','cuddle','poke','dance','wave','smile','wink','bite','nom','yeet','glomp','happy','highfive']
+    const cap=s=>s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' ')
+    const extraFun=[
+      {name:'Truth',path:'/fun/truth',desc:'Get a random truth question for Truth or Dare.',params:[],ex:'{"question":"What is the most embarrassing thing you have done?"}'},
+      {name:'Dare',path:'/fun/dare',desc:'Get a random dare challenge for Truth or Dare.',params:[],ex:'{"dare":"Speak in an accent for the next 5 minutes."}'},
+      {name:'Would You Rather',path:'/fun/wyr',desc:'Get a random "Would You Rather" dilemma.',params:[],ex:'{"option1":"Would you rather fly or be invisible?","option2":"..."}'},
+      {name:'Random Quote',path:'/fun/quote',desc:'Get a random inspirational or funny quote.',params:[],ex:'{"quote":"The only way to do great work is to love what you do.","author":"Steve Jobs"}'},
+      {name:'Quote Audio',path:'/fun/quoteaudio',desc:'Get a random quote with a generated audio URL (expires 10 min).',params:[],ex:'{"quote":"...","author":"...","audio_url":"https://yourserver.com/audio/abc123.wav"}'},
+      {name:'Bible Verse',path:'/fun/bible',desc:'Get a random Bible verse, or specify book/chapter/verse.',params:[{n:'book',req:0,ph:'john'},{n:'chapter',req:0,ph:'3'},{n:'verse',req:0,ph:'16'}],ex:'{"book":"John","chapter":3,"verse":16,"text":"For God so loved the world..."}'},
+      {name:'Quran Ayah',path:'/fun/quran',desc:'Get a random Quran ayah, or specify surah/ayah.',params:[{n:'surah',req:0,ph:'1'},{n:'ayah',req:0,ph:'1'}],ex:'{"surah":1,"ayah":1,"text":"In the name of Allah, the Most Gracious, the Most Merciful."}'},
+    ]
+    return{id:'fun',name:'Fun',count:NK.length+WF.length+extraFun.length,desc:'Anime reaction images from nekos.life, reaction GIFs from waifu.pics, Truth/Dare/WYR, quotes, Bible verses and Quran ayahs',eps:[
+      ...NK.map(c=>({name:cap(c)+' (Nekos)',path:`/fun/nekos/${c}`,desc:`Fetch a random ${c} image from nekos.life.`,params:[],ex:`{"type":"${c}","url":"https://..."}`})),
+      ...WF.map(c=>({name:cap(c)+' (Waifu)',path:`/fun/waifu/${c}`,desc:`Fetch a random ${c} reaction GIF from waifu.pics.`,params:[],ex:`{"type":"${c}","url":"https://cdn.waifu.pics/....gif"}`})),
+      ...extraFun
+    ]}
+  })(),
+  (()=>{
+    const EC={'Glitch & Digital':['glitchtext','pixelglitch','neonglitch','deletingtext'],'Neon & Glow':['advancedglow','glowingtext','makingneon','multicoloredneon','lighteffects'],'3D Effects':['gradienttext','underwatertext','royaltext','freecreate'],'Galaxy & Space':['galaxywallpaper','galaxystyle'],'K-Pop Style':['blackpinkstyle','blackpinklogo'],'Artistic':['cartoonstyle','papercutstyle','watercolortext','typographytext'],'Nature & Scenery':['effectclouds','summerbeach','sandsummer','writetext'],'Gold & Luxury':['luxurygold','logomaker'],'Flag & National':['flagtext','flag3dtext'],'Retro & Vintage':['1917style']}
+    const cap=s=>s.charAt(0).toUpperCase()+s.slice(1)
+    const ae=Object.entries(EC).flatMap(([cat,effects])=>effects.map(e=>({name:cap(e)+' ('+cat+')',path:'/tools/ephoto/'+e,desc:`Apply the "${e}" text effect from the ${cat} category.`,params:[{n:'text',req:1,ph:'Trashcore'}],ex:`"url":"https://cdn.ephoto360.com/.../${e}.jpg"`})))
+    return{id:'ephoto',name:'Ephoto',count:ae.length+3,desc:'Stylized text-to-image effects — glitch, neon, 3D, galaxy, K-pop, watercolor, gold, flag and retro styles',eps:[
+      {name:'List All Effects',path:'/tools/ephoto/effects',desc:'Returns all available effect names.',params:[],ex:'{"total":38,"effects":["glitchtext","pixelglitch",...]}'},
+      {name:'Effects by Category',path:'/tools/ephoto/categories',desc:'Returns all effects grouped by visual category.',params:[],ex:'{"total_categories":10,"categories":[...]}'},
+      {name:'Generic Effect',path:'/tools/ephoto',desc:'Apply any effect via query params.',params:[{n:'effect',req:1,ph:'glitchtext'},{n:'text',req:1,ph:'Trashcore'}],ex:'"url":"https://cdn.ephoto360.com/.../glitchtext.jpg"'},
+      ...ae
+    ]}
+  })()
+]
+
+// ══════════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════════
+let activeCat=null
+
+function renderCats(filter=''){
+  const f=filter.toLowerCase()
+  const list=document.getElementById('cat-list')
+  const filtered=CATS.filter(c=>!f||c.name.toLowerCase().includes(f)||c.desc.toLowerCase().includes(f))
+  list.innerHTML=filtered.map(c=>{
+    const m=CAT_META[c.id]||{icon:'📦',color:'var(--green)'}
+    return`<div class="cat-card" style="--cat-color:${m.color}" onclick="openCatWithProgress('${c.id}')">
+      <div class="cat-icon">${m.icon}</div>
+      <div class="cat-info">
+        <div class="cat-name">${c.name}<span class="cat-count">${c.count} endpoints</span></div>
+        <div class="cat-desc">${c.desc}</div>
+      </div>
+      <svg class="cat-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`
+  }).join('')
+}
+function filterCategories(v){ renderCats(v) }
+
+function openCatWithProgress(id){
+  const cat=CATS.find(c=>c.id===id)
+  if(!cat) return
+  visitedCats.add(id)
+  document.getElementById('s-explored').textContent=visitedCats.size+' / 8'
+  document.getElementById('sb-explored').textContent=visitedCats.size
+  showBrowseOverlay(cat.name,()=>{ openCat(id) })
+}
+
+function openCat(id){
+  activeCat=CATS.find(c=>c.id===id)
+  if(!activeCat) return
+  document.getElementById('ep-cat-title').textContent=activeCat.name
+  document.getElementById('ep-cat-count').textContent=activeCat.eps.length+' endpoints'
+  renderEndpoints()
+  showView('endpoints')
+  document.getElementById('ep-search').value=''
+}
+
+function renderEndpoints(filter=''){
+  if(!activeCat) return
+  const f=filter.toLowerCase()
+  const eps=activeCat.eps.filter(e=>!f||e.name.toLowerCase().includes(f)||e.path.toLowerCase().includes(f)||(e.desc||'').toLowerCase().includes(f))
+  document.getElementById('ep-list').innerHTML=eps.map((e,i)=>{
+    const uid=activeCat.id+'-'+i,method=e.method||'GET'
+    const pRows=(e.params&&e.params.length)?e.params.map(p=>`
+      <div class="param-row">
+        <div class="param-label">${p.n} <span class="${p.req?'param-req':'param-opt'}">${p.req?'required':'optional'}</span></div>
+        ${p.select?`<select class="param-select" data-param="${p.n}"><option value="">(default: ${p.ph})</option>${p.select.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`:`<input class="param-input" data-param="${p.n}" placeholder="${p.ph||''}" autocomplete="off" spellcheck="false"/>`}
+      </div>`).join(''):''
+    const uRow=e.isUpload?`
+      <div class="param-row"><div class="param-label">audio <span class="param-req">required</span></div><input type="file" data-upload accept="audio/*" style="width:100%;font-size:.72rem;color:var(--text2);padding:.35rem 0"/></div>
+      <div class="param-row"><div class="param-label">model <span class="param-opt">optional</span></div><input class="param-input" data-param="model" placeholder="whisper-large-v3-turbo" autocomplete="off"/></div>`:''
+    const acts=e.isUpload?`<button class="run-btn" onclick="runUpload(this,'${e.path}')">▶ Upload &amp; Execute</button>`:
+      `<button class="run-btn" onclick="runApi(this,'${e.path}')">▶ Execute</button><button class="url-btn" onclick="copyUrl(this,'${e.path}')" title="Copy URL">⎘</button>`
+    return`<div class="ep-card" id="${uid}">
+      <div class="ep-row" onclick="toggleEp('${uid}')">
+        <span class="method-badge ${method}">${method}</span>
+        <span class="ep-name">${e.name}</span>
+        <span class="ep-chevron">▼</span>
+      </div>
+      <div class="ep-path-tiny">${e.path}</div>
+      <div class="ep-body">
+        <div class="ep-sec-label">▸ Try It</div>
+        <div class="try-desc">${e.desc||''}</div>
+        ${pRows}${uRow}
+        <div class="ep-actions">${acts}</div>
+        <div class="result-wrap" id="rw-${uid}"></div>
+        <hr class="ep-divider"/>
+        <div class="ep-sec-label">▸ Example Response</div>
+        <div class="resp-block">${(e.ex||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        <hr class="ep-divider"/>
+        <div class="ep-sec-label">▸ HTTP Status Codes</div>
+        <table class="status-table">
+          <tr><th>CODE</th><th>MEANING</th></tr>
+          <tr><td><span class="sc s200"><span class="sc-dot"></span>200</span></td><td>Success — result in the <code>result</code> field</td></tr>
+          <tr><td><span class="sc s400"><span class="sc-dot"></span>400</span></td><td>Bad request — missing or invalid parameter</td></tr>
+          <tr><td><span class="sc s500"><span class="sc-dot"></span>500</span></td><td>Server error — upstream service failed</td></tr>
+        </table>
+      </div>
+    </div>`
+  }).join('')
+}
+function filterEndpoints(v){ renderEndpoints(v) }
+function toggleEp(uid){ document.getElementById(uid).classList.toggle('open') }
+
+function getParams(card){
+  const p=new URLSearchParams()
+  card.querySelectorAll('[data-param]').forEach(el=>{ const v=el.value.trim();if(v) p.set(el.dataset.param,v) })
+  return p
+}
+
+async function runApi(btn,path){
+  const card=btn.closest('.ep-card'),uid=card.id,params=getParams(card)
+  const url="https://apis-production-828f.up.railway.app"+path+(params.toString()?'?'+params.toString():'')
+  const rw=document.getElementById('rw-'+uid)
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Executing...'
+  rw.className='result-wrap show';rw.innerHTML='<div style="font-family:var(--mono);font-size:.62rem;color:var(--text3)">Fetching response...</div>'
+  incRequests()
+  try{
+    const r=await fetch(url),data=await r.json(),json=JSON.stringify(data,null,2)
+    const e=json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    rw.innerHTML=`<div class="result-topbar"><span class="result-badge ${r.ok?'ok':'err'}">${r.status} ${r.statusText||''}</span><button class="result-copy" onclick="cpResult(this)">⎘ Copy JSON</button></div><div class="result-pre${r.ok?'':' error'}">${e}</div>`
+    rw.querySelector('.result-pre').dataset.json=json
+  }catch(err){
+    rw.innerHTML=`<div class="result-topbar"><span class="result-badge err">Network Error</span></div><div class="result-pre error">❌ ${err.message}</div>`
+  }finally{ btn.disabled=false;btn.innerHTML='▶ Execute' }
+}
+
+async function runUpload(btn,path){
+  const card=btn.closest('.ep-card'),uid=card.id,rw=document.getElementById('rw-'+uid)
+  const fi=card.querySelector('input[data-upload]'),mi=card.querySelector('input[data-param="model"]')
+  if(!fi||!fi.files[0]){rw.className='result-wrap show';rw.innerHTML=`<div class="result-topbar"><span class="result-badge err">No file selected</span></div><div class="result-pre error">Please select an audio file first.</div>`;return}
+  const fd=new FormData();fd.append('audio',fi.files[0])
+  if(mi&&mi.value.trim()) fd.append('model',mi.value.trim())
+  const up=new URLSearchParams();if(mi&&mi.value.trim()) up.set('model',mi.value.trim())
+  const url="https://apis-production-828f.up.railway.app"+path+(up.toString()?'?'+up.toString():'')
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Uploading...'
+  rw.className='result-wrap show';rw.innerHTML='<div style="font-family:var(--mono);font-size:.62rem;color:var(--text3)">Transcribing audio...</div>'
+  incRequests()
+  try{
+    const r=await fetch(url,{method:'POST',body:fd}),data=await r.json(),json=JSON.stringify(data,null,2)
+    const e=json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    rw.innerHTML=`<div class="result-topbar"><span class="result-badge ${r.ok?'ok':'err'}">${r.status} ${r.statusText||''}</span><button class="result-copy" onclick="cpResult(this)">⎘ Copy JSON</button></div><div class="result-pre${r.ok?'':' error'}">${e}</div>`
+    rw.querySelector('.result-pre').dataset.json=json
+  }catch(err){
+    rw.innerHTML=`<div class="result-topbar"><span class="result-badge err">Upload Failed</span></div><div class="result-pre error">❌ ${err.message}</div>`
+  }finally{ btn.disabled=false;btn.innerHTML='▶ Upload & Execute' }
+}
+
+function copyUrl(btn,path){
+  const params=getParams(btn.closest('.ep-card'))
+  const url="https://apis-production-828f.up.railway.app"+path+(params.toString()?'?'+params.toString():'')
+  navigator.clipboard.writeText(url).then(()=>{ btn.style.color='var(--green)';setTimeout(()=>{btn.style.color=''},1500) })
+}
+function cpResult(btn){
+  const pre=btn.closest('.result-wrap').querySelector('.result-pre')
+  navigator.clipboard.writeText(pre.dataset.json||pre.textContent).then(()=>{
+    const o=btn.textContent;btn.textContent='✓ Copied';btn.classList.add('ok')
+    setTimeout(()=>{btn.textContent=o;btn.classList.remove('ok')},1500)
+  })
+}
+
+// ══════════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderCats()
+})
+</script>
+</body>
+</html>
