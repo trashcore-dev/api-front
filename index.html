@@ -1,951 +1,1515 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WhatsApp Report Assistant — Lord Diego</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    /* ─── Design Tokens ─────────────────────────────── */
-    :root {
-      --bg-base:       #0a0d14;
-      --bg-surface:    #0e1220;
-      --bg-card:       #131829;
-      --bg-card-hover: #171e30;
-      --border:        rgba(255,255,255,0.07);
-      --border-focus:  rgba(124,93,250,0.6);
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Trashcore API — Free REST API Docs v2.4.0</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#04090f;--bg2:#070e18;--bg3:#0a1220;
+  --card:#0d1520;--card2:#111c2a;--card3:#152030;
+  --border:#0f2035;--border2:#163050;--border3:#1e4070;
+  --green:#0088ff;--green2:#005fcc;--red:#ef4444;
+  --yellow:#eab308;--cyan:#00ccff;--purple:#a855f7;--orange:#f97316;
+  --text:#d8eaff;--text2:#6a9abb;--text3:#2e4d6a;--text4:#1a2e40;
+  --mono:'JetBrains Mono',monospace;--sans:'Outfit',sans-serif;
+  --nav:58px;
+  --glow-green:0 0 20px rgba(0,136,255,.15);
+  --glow-cyan:0 0 20px rgba(0,204,255,.15);
+  --glow-purple:0 0 20px rgba(168,85,247,.15);
+  --radius:14px;--radius-sm:8px;--radius-xs:6px;
+}
 
-      --violet:        #7c5dfa;
-      --violet-light:  #9b7dff;
-      --violet-glow:   rgba(124,93,250,0.18);
-      --teal:          #00d4b4;
-      --teal-glow:     rgba(0,212,180,0.12);
-      --rose:          #f45b88;
-      --rose-glow:     rgba(244,91,136,0.14);
-      --amber:         #ffb86c;
+/* ══ LIGHT MODE ══ */
+[data-theme="light"]{
+  --bg:#eef4ff;--bg2:#f5f9ff;--bg3:#ffffff;
+  --card:#ffffff;--card2:#f0f6ff;--card3:#e2edff;
+  --border:#c0d8f0;--border2:#a0c0e8;--border3:#6090c8;
+  --text:#091830;--text2:#3a5a7a;--text3:#8aaacc;--text4:#b8ccdd;
+}
+[data-theme="light"] .nav{background:rgba(238,244,255,.92)}
+[data-theme="light"] .view-toolbar{background:rgba(238,244,255,.97)}
+[data-theme="light"] .ep-header-bar{background:var(--bg2)}
+[data-theme="light"] .result-pre{background:var(--bg2)}
+[data-theme="light"] .code-line{background:var(--bg2)}
+[data-theme="light"] .resp-block{background:var(--bg2)}
+[data-theme="light"] .param-input,[data-theme="light"] .param-select{background:var(--bg2)}
+[data-theme="light"] #browse-overlay{background:rgba(230,242,255,.96)}
+[data-theme="light"] #loader{background:var(--bg)}
 
-      --text-primary:  #f0f2f8;
-      --text-secondary:#8b92aa;
-      --text-muted:    #555e78;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
 
-      --radius-sm:  8px;
-      --radius-md:  14px;
-      --radius-lg:  20px;
-      --radius-xl:  28px;
+/* ═══════════════════════════════════════════════════════════
+   LOADING SCREEN — Spinning Circle (10 seconds)
+═══════════════════════════════════════════════════════════ */
+#loader{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:28px;padding:2rem;
+  transition:opacity .6s ease;
+}
+#loader.fade-out{opacity:0;pointer-events:none}
 
-      --shadow-card: 0 4px 40px rgba(0,0,0,0.45);
-      --shadow-glow: 0 0 40px rgba(124,93,250,0.22);
+.ld-logo{
+  font-family:var(--mono);font-size:1rem;font-weight:700;
+  letter-spacing:.12em;color:var(--text);
+  display:flex;align-items:center;gap:.6rem;
+}
+.ld-logo-mark{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.6rem;font-weight:900;color:#fff;
+}
+.ld-logo-text{font-size:.95rem;letter-spacing:.1em}
+.ld-logo-sub{font-size:.55rem;letter-spacing:.2em;color:var(--text2)}
 
-      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
-    }
+/* Spinner */
+.ld-spinner-wrap{
+  position:relative;width:130px;height:130px;
+  display:flex;align-items:center;justify-content:center;
+}
+.ld-spinner-svg{
+  position:absolute;inset:0;width:100%;height:100%;
+  transform:rotate(-90deg);
+  animation:ldSpin 1.6s linear infinite;
+}
+@keyframes ldSpin{to{transform:rotate(270deg)}}
+.ld-spinner-track{fill:none;stroke:var(--border2);stroke-width:4}
+.ld-spinner-fill{
+  fill:none;stroke:url(#ldGrad);stroke-width:4;stroke-linecap:round;
+  stroke-dasharray:326.73;stroke-dashoffset:326.73;
+  transition:stroke-dashoffset .3s linear;
+  filter:drop-shadow(0 0 8px rgba(0,136,255,.9));
+}
+.ld-pct{
+  font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--green);
+  text-shadow:0 0 20px rgba(0,136,255,.5);letter-spacing:.05em;
+  text-align:center;
+}
+.ld-pct-sub{font-size:.5rem;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-top:2px;text-align:center}
 
-    /* ─── Reset ─────────────────────────────────────── */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+.ld-status-text{
+  font-family:var(--mono);font-size:.6rem;color:var(--text3);
+  letter-spacing:.12em;text-align:center;text-transform:uppercase;
+  max-width:300px;line-height:1.8;
+}
+.ld-status-text span{color:var(--cyan)}
 
-    html { font-size: 16px; }
+.ld-meta-row{
+  display:flex;gap:1.5rem;
+  border-top:1px solid var(--border2);padding-top:1rem;
+  font-family:var(--mono);
+}
+.ld-meta-item{text-align:center}
+.ld-meta-val{font-size:.68rem;font-weight:700;color:var(--text);margin-bottom:.15rem}
+.ld-meta-lbl{font-size:.48rem;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-base);
-      min-height: 100vh;
-      color: var(--text-primary);
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
+/* ═══════════════════════════════════════════════════════════
+   BROWSE OVERLAY
+═══════════════════════════════════════════════════════════ */
+#browse-overlay{
+  position:fixed;inset:0;z-index:8000;
+  background:rgba(4,9,15,.96);backdrop-filter:blur(20px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.5rem;padding:2rem;
+}
+#browse-overlay.show{display:flex}
 
-    /* ─── Background mesh ────────────────────────────── */
-    .bg-mesh {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .bg-mesh::before {
-      content: '';
-      position: absolute;
-      width: 800px; height: 800px;
-      top: -300px; left: -200px;
-      background: radial-gradient(ellipse, rgba(124,93,250,0.12) 0%, transparent 70%);
-      animation: drift1 25s ease-in-out infinite alternate;
-    }
-    .bg-mesh::after {
-      content: '';
-      position: absolute;
-      width: 600px; height: 600px;
-      bottom: -200px; right: -100px;
-      background: radial-gradient(ellipse, rgba(0,212,180,0.08) 0%, transparent 70%);
-      animation: drift2 30s ease-in-out infinite alternate;
-    }
-    @keyframes drift1 { to { transform: translate(60px, 80px) scale(1.1); } }
-    @keyframes drift2 { to { transform: translate(-60px, -40px) scale(1.15); } }
+.bo-icon{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(0,136,255,.06);border:1px solid rgba(0,136,255,.2);
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+  box-shadow:var(--glow-green);
+  animation:bo-pulse 2s ease-in-out infinite;
+}
+@keyframes bo-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,136,255,.2)}50%{box-shadow:0 0 0 12px rgba(0,136,255,0)}}
+.bo-title{font-family:var(--mono);font-size:.8rem;font-weight:700;letter-spacing:.08em;color:var(--text);text-align:center}
+.bo-cat{color:var(--green);font-size:.85rem}
+.bo-bar-wrap{width:min(360px,85vw);height:2px;background:var(--card3);border-radius:999px;overflow:hidden}
+.bo-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--green2),var(--green),var(--cyan));border-radius:999px;box-shadow:0 0 10px var(--green);transition:width .4s ease}
+.bo-pct{font-family:var(--mono);font-size:.62rem;color:var(--text2)}
+.bo-msg{
+  font-family:var(--mono);font-size:.6rem;color:var(--text3);
+  letter-spacing:.06em;text-align:center;
+  min-height:1.2rem;transition:opacity .3s;
+}
+.bo-steps{display:flex;flex-direction:column;gap:.3rem;width:min(360px,85vw)}
+.bo-step{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.58rem;color:var(--text4);transition:color .3s}
+.bo-step.done{color:var(--green)}
+.bo-step.active{color:var(--text2)}
+.bo-step-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
 
-    /* Floating dots */
-    .dots { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-    .dot {
-      position: absolute;
-      border-radius: 50%;
-      background: var(--violet);
-      opacity: 0;
-      animation: rise linear infinite;
-    }
-    @keyframes rise {
-      0%   { transform: translateY(110vh); opacity: 0; }
-      8%   { opacity: .35; }
-      92%  { opacity: .35; }
-      100% { transform: translateY(-10vh); opacity: 0; }
-    }
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL ANIMATIONS
+═══════════════════════════════════════════════════════════ */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes counter-in{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
 
-    /* ─── Layout ─────────────────────────────────────── */
-    .page {
-      position: relative;
-      z-index: 1;
-      max-width: 1240px;
-      margin: 0 auto;
-      padding: 32px 20px 60px;
-    }
+/* ═══════════════════════════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════════════════════════ */
+.theme-toggle-nav{
+  background:none;border:1px solid var(--border2);
+  color:var(--text2);cursor:pointer;
+  width:32px;height:32px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;transition:all .2s;
+}
+.theme-toggle-nav:hover{background:rgba(0,136,255,.1);border-color:var(--green);color:var(--green)}
 
-    /* ─── Header ─────────────────────────────────────── */
-    .header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .header-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--violet-glow);
-      border: 1px solid rgba(124,93,250,0.3);
-      color: var(--violet-light);
-      border-radius: 999px;
-      padding: 6px 18px;
-      font-size: .78rem;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-    }
-    .header-pill .dot-live {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--teal);
-      box-shadow: 0 0 8px var(--teal);
-      animation: blink 2s ease-in-out infinite;
-    }
-    @keyframes blink { 50% { opacity: .3; } }
+/* ═══════════════════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════════════════ */
+.nav{
+  position:sticky;top:0;z-index:200;height:var(--nav);
+  background:rgba(4,9,15,.9);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 1.1rem;gap:.75rem;
+}
+.nav-burger{background:none;border:none;color:var(--text);cursor:pointer;padding:6px;display:flex;flex-direction:column;gap:4px;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.nav-burger span{display:block;width:18px;height:1.5px;background:currentColor;border-radius:1px;transition:all .2s}
+.nav-logo{
+  font-family:var(--mono);font-size:.78rem;font-weight:700;flex:1;
+  display:flex;align-items:center;gap:.5rem;
+}
+.nav-logo-mark{
+  width:22px;height:22px;border-radius:6px;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.6rem;font-weight:900;color:#fff;letter-spacing:-.01em;
+}
+.nav-logo-text em{color:var(--text2);font-style:normal}
+.nav-status{
+  display:flex;align-items:center;gap:.4rem;
+  font-family:var(--mono);font-size:.55rem;
+  background:rgba(0,136,255,.06);border:1px solid rgba(0,136,255,.18);
+  color:var(--green);padding:4px 10px;border-radius:999px;
+}
+.nav-status-dot{width:5px;height:5px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:blink 2s ease-in-out infinite}
+.nav-badge{font-family:var(--mono);font-size:.55rem;background:var(--card2);border:1px solid var(--border2);color:var(--text3);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.nav-ping{font-family:var(--mono);font-size:.52rem;color:var(--text3);white-space:nowrap;display:none}
 
-    h1.site-title {
-      font-size: clamp(2.2rem, 5vw, 3.8rem);
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      background: linear-gradient(135deg, #c4b3ff 0%, #7c5dfa 40%, #00d4b4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 14px;
-    }
-    .site-tagline {
-      font-size: 1.05rem;
-      color: var(--text-secondary);
-      font-weight: 400;
-      line-height: 1.6;
-    }
-    .site-tagline strong {
-      color: var(--violet-light);
-      font-weight: 700;
-    }
+/* ═══════════════════════════════════════════════════════════
+   DRAWER
+═══════════════════════════════════════════════════════════ */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.drawer{
+  position:fixed;top:0;left:0;bottom:0;width:290px;
+  background:var(--bg2);z-index:400;
+  transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;padding:0;
+  border-right:1px solid var(--border);
+}
+.drawer.open{transform:translateX(0)}
+.drawer-head{
+  padding:1.5rem 1.25rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.drawer-brand{display:flex;align-items:center;gap:.6rem}
+.drawer-logo-mark{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.65rem;font-weight:900;color:#fff;
+}
+.drawer-title{font-size:.95rem;font-weight:800}
+.drawer-sub{font-size:.68rem;color:var(--text2)}
+.drawer-close{background:none;border:1px solid var(--border2);color:var(--text2);cursor:pointer;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.75rem;-webkit-tap-highlight-color:transparent}
+.drawer-section{padding:.75rem 1rem .5rem;font-family:var(--mono);font-size:.5rem;letter-spacing:.12em;color:var(--text3);text-transform:uppercase}
+.drawer-nav{display:flex;flex-direction:column;gap:.15rem;padding:0 .75rem}
+.drawer-link{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem .85rem;border-radius:10px;
+  font-size:.85rem;font-weight:500;color:var(--text2);
+  cursor:pointer;transition:all .15s;border:none;background:none;text-align:left;width:100%;
+  -webkit-tap-highlight-color:transparent;text-decoration:none;
+}
+.drawer-link:hover{background:var(--card2);color:var(--text)}
+.drawer-link svg{opacity:.4}
+.drawer-link .drawer-link-icon{font-size:.85rem;width:20px;text-align:center;flex-shrink:0}
+.drawer-divider{height:1px;background:var(--border);margin:.4rem .75rem}
+.drawer-follow{
+  margin:1rem;background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:1rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+}
+.drawer-follow-btn{width:36px;height:36px;min-width:36px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 
-    .conn-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 14px;
-      border-radius: 999px;
-      font-size: .78rem;
-      font-weight: 600;
-      margin-top: 16px;
-      border: 1px solid transparent;
-    }
-    .conn-status .indicator {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-    }
-    .conn-status.online  { background: rgba(0,212,100,0.1); border-color: rgba(0,212,100,0.25); color: #00d464; }
-    .conn-status.online  .indicator { background: #00d464; box-shadow: 0 0 6px #00d464; }
-    .conn-status.offline { background: rgba(244,91,136,0.1); border-color: rgba(244,91,136,0.25); color: var(--rose); }
-    .conn-status.offline .indicator { background: var(--rose); }
-    .conn-status.connecting { background: rgba(255,184,108,0.1); border-color: rgba(255,184,108,0.25); color: var(--amber); }
-    .conn-status.connecting .indicator { background: var(--amber); animation: blink 1s ease-in-out infinite; }
+/* ═══════════════════════════════════════════════════════════
+   AI ASSISTANT FAB + PANEL
+═══════════════════════════════════════════════════════════ */
+.ai-fab{
+  position:fixed;bottom:90px;right:1.25rem;z-index:600;
+  width:50px;height:50px;
+  background:linear-gradient(135deg,var(--green2),var(--green));
+  border:none;color:#fff;font-size:20px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  border-radius:0;
+  box-shadow:0 0 28px rgba(0,136,255,.5),0 4px 18px rgba(0,0,0,.4);
+  transition:transform .15s,box-shadow .2s;
+  animation:aiFabPulse 3s ease-in-out infinite;
+}
+@keyframes aiFabPulse{0%,100%{box-shadow:0 0 28px rgba(0,136,255,.5),0 4px 18px rgba(0,0,0,.4)}50%{box-shadow:0 0 48px rgba(0,136,255,.8),0 4px 18px rgba(0,0,0,.4)}}
+.ai-fab:hover{transform:translateY(-2px);box-shadow:0 0 48px rgba(0,136,255,.7),0 6px 22px rgba(0,0,0,.5)}
 
-    /* ─── Stats Row ──────────────────────────────────── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 24px 20px;
-      text-align: center;
-      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
-    }
-    .stat-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(124,93,250,0.25);
-      box-shadow: var(--shadow-glow);
-    }
-    .stat-icon-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      margin: 0 auto 14px;
-      font-size: 1.25rem;
-    }
-    .stat-icon-wrap.violet { background: var(--violet-glow); }
-    .stat-icon-wrap.teal   { background: var(--teal-glow); }
-    .stat-icon-wrap.rose   { background: var(--rose-glow); }
-    .stat-icon-wrap.amber  { background: rgba(255,184,108,0.12); }
+.ai-panel{
+  position:fixed;bottom:150px;right:1.25rem;z-index:590;
+  width:320px;max-width:calc(100vw - 2rem);
+  background:var(--bg2);border:1px solid var(--green);
+  box-shadow:0 0 60px rgba(0,136,255,.2);
+  display:flex;flex-direction:column;max-height:440px;
+  transform:scale(.9) translateY(20px);transform-origin:bottom right;
+  opacity:0;pointer-events:none;
+  transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .25s;
+  border-radius:0;
+}
+.ai-panel.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
 
-    .stat-number {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--text-primary);
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-    .stat-label {
-      font-size: .72rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-    }
+.ai-panel-header{
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.ai-panel-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 8px rgba(0,136,255,.8);animation:blink 1.5s ease-in-out infinite}
+.ai-panel-title{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);letter-spacing:.15em;text-transform:uppercase;flex:1}
+.ai-panel-close{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:2px 6px;transition:color .15s}
+.ai-panel-close:hover{color:var(--red)}
 
-    /* ─── Main Grid ──────────────────────────────────── */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
+.ai-messages{
+  flex:1;overflow-y:auto;padding:12px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.ai-messages::-webkit-scrollbar{width:3px}
+.ai-messages::-webkit-scrollbar-track{background:transparent}
+.ai-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
-    /* ─── Card ───────────────────────────────────────── */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 32px;
-      box-shadow: var(--shadow-card);
-      transition: border-color var(--transition);
-    }
-    .card:hover { border-color: rgba(124,93,250,0.18); }
+.ai-msg{max-width:87%;font-size:.72rem;line-height:1.7;letter-spacing:.02em;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ai-msg.bot{align-self:flex-start;background:rgba(0,136,255,.07);border:1px solid rgba(0,136,255,.18);color:var(--text);padding:9px 12px}
+.ai-msg.user{align-self:flex-end;background:var(--green);color:#fff;padding:9px 12px}
+.ai-msg-label{font-size:.48rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:3px;opacity:.6}
 
-    .card-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 26px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .card-title .icon {
-      display: flex; align-items: center; justify-content: center;
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      background: var(--violet-glow);
-      font-size: .95rem;
-    }
+.ai-typing{align-self:flex-start;display:flex;gap:3px;padding:10px 12px;background:rgba(0,136,255,.07);border:1px solid rgba(0,136,255,.18)}
+.ai-typing span{width:5px;height:5px;background:var(--green);border-radius:50%;animation:typingDot 1.2s ease-in-out infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}
+.ai-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,80%,100%{transform:scale(1);opacity:.5}40%{transform:scale(1.3);opacity:1}}
 
-    /* ─── Form Elements ──────────────────────────────── */
-    .form-group { margin-bottom: 22px; }
+.ai-quick-btns{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 8px}
+.ai-quick-btn{
+  background:none;border:1px solid var(--border2);color:var(--cyan);
+  font-family:var(--mono);font-size:.5rem;padding:4px 8px;cursor:pointer;
+  letter-spacing:.04em;transition:border-color .15s,background .15s;
+}
+.ai-quick-btn:hover{border-color:var(--cyan);background:rgba(0,204,255,.06)}
 
-    label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: .82rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      margin-bottom: 9px;
-    }
-    .required { color: var(--rose); font-size: .9rem; }
+.ai-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:6px}
+.ai-input{
+  flex:1;background:rgba(0,0,0,.3);border:1px solid var(--border2);
+  color:var(--text);font-family:var(--mono);font-size:.7rem;padding:7px 10px;
+  outline:none;transition:border-color .15s;
+}
+.ai-input:focus{border-color:var(--green)}
+.ai-input::placeholder{color:var(--text3)}
+.ai-send-btn{
+  background:var(--green);border:none;color:#fff;
+  font-family:var(--mono);font-size:.62rem;padding:7px 12px;
+  cursor:pointer;letter-spacing:.08em;transition:box-shadow .15s;
+}
+.ai-send-btn:hover{box-shadow:0 0 16px rgba(0,136,255,.5)}
 
-    input[type="tel"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 13px 16px;
-      background: var(--bg-surface);
-      border: 1.5px solid rgba(255,255,255,0.09);
-      border-radius: var(--radius-md);
-      font-size: .93rem;
-      font-family: 'Inter', sans-serif;
-      color: var(--text-primary);
-      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
-      outline: none;
-      -webkit-appearance: none;
-    }
-    input[type="tel"]::placeholder,
-    textarea::placeholder { color: var(--text-muted); }
+/* ═══════════════════════════════════════════════════════════
+   PAGE VIEWS
+═══════════════════════════════════════════════════════════ */
+.view{display:none}
+.view.active{display:block}
 
-    input[type="tel"]:hover,
-    textarea:hover,
-    select:hover {
-      border-color: rgba(124,93,250,0.35);
-      background: #0f1526;
-    }
-    input[type="tel"]:focus,
-    textarea:focus,
-    select:focus {
-      border-color: var(--violet);
-      box-shadow: 0 0 0 3px var(--violet-glow);
-      background: #0f1526;
-    }
-    input[type="tel"].error,
-    textarea.error,
-    select.error {
-      border-color: var(--rose);
-      box-shadow: 0 0 0 3px var(--rose-glow);
-    }
+/* ═══════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════ */
+.hero-wrap{position:relative;overflow:hidden}
+.hero-glow{
+  position:absolute;top:-60px;left:50%;transform:translateX(-50%);
+  width:500px;height:300px;
+  background:radial-gradient(ellipse at center,rgba(0,136,255,.07) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.hero{padding:3.5rem 1.25rem 2rem;max-width:660px;margin:0 auto;text-align:center;position:relative;z-index:1}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:.45rem;
+  font-family:var(--mono);font-size:.58rem;
+  background:rgba(0,136,255,.06);border:1px solid rgba(0,136,255,.2);
+  color:var(--green);padding:5px 14px;border-radius:999px;
+  margin-bottom:1.75rem;letter-spacing:.06em;
+  box-shadow:0 0 20px rgba(0,136,255,.08);
+}
+.hero-tag-dot{width:5px;height:5px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:blink 2s ease-in-out infinite}
+.hero h1{font-size:clamp(1.9rem,7.5vw,3rem);font-weight:900;line-height:1.08;letter-spacing:-.03em;margin-bottom:1.1rem}
+.hero h1 .grad{background:linear-gradient(135deg,#fff 0%,rgba(0,136,255,.9) 60%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--text2);font-size:.88rem;line-height:1.75;margin-bottom:2rem;max-width:480px;margin-left:auto;margin-right:auto}
+.hero-btns{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-size:.8rem;font-weight:700;padding:.72rem 1.5rem;border-radius:var(--radius-sm);cursor:pointer;transition:all .18s;border:none;display:inline-flex;align-items:center;gap:.4rem;-webkit-tap-highlight-color:transparent;letter-spacing:-.01em}
+.btn-primary{background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;box-shadow:0 0 20px rgba(0,136,255,.25),0 2px 8px rgba(0,0,0,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(0,136,255,.4),0 4px 12px rgba(0,0,0,.3)}
+.btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--card3);border-color:var(--border3)}
 
-    textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+/* ═══════════════════════════════════════════════════════════
+   TICKER STATS BAR
+═══════════════════════════════════════════════════════════ */
+.stats-bar{
+  display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:var(--bg2);overflow-x:auto;scrollbar-width:none;
+}
+.stats-bar::-webkit-scrollbar{display:none}
+.sbar-item{flex:1;min-width:80px;padding:1rem .75rem;border-right:1px solid var(--border);text-align:center;transition:background .2s;cursor:default}
+.sbar-item:last-child{border-right:none}
+.sbar-item:hover{background:var(--card)}
+.sbar-n{font-family:var(--mono);font-size:1.1rem;font-weight:700;line-height:1;margin-bottom:.3rem;animation:counter-in .6s ease both}
+.sbar-n.g{color:var(--green)}.sbar-n.c{color:var(--cyan)}.sbar-n.y{color:var(--yellow)}.sbar-n.p{color:var(--purple)}.sbar-n.o{color:var(--orange)}
+.sbar-l{font-size:.52rem;color:var(--text3);letter-spacing:.08em;font-weight:600;text-transform:uppercase}
 
-    select {
-      cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238b92aa' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 40px;
-    }
-    select option { background: #131829; color: var(--text-primary); }
+/* ═══════════════════════════════════════════════════════════
+   SESSION PANEL
+═══════════════════════════════════════════════════════════ */
+.session-panel{
+  background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:1.5rem 1.25rem;max-width:680px;margin:0 auto;
+}
+.panel-header{display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem}
+.panel-header-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 2s ease-in-out infinite}
+.panel-title{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text2)}
+.panel-subtitle{font-family:var(--mono);font-size:.52rem;color:var(--text3);margin-left:auto}
 
-    .error-msg {
-      display: none;
-      font-size: .78rem;
-      color: var(--rose);
-      margin-top: 7px;
-      padding-left: 2px;
-    }
-    .error-msg.show { display: block; }
+.session-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.session-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:var(--radius-sm);
+  padding:.75rem .85rem;display:flex;align-items:center;gap:.65rem;
+  transition:border-color .2s;
+}
+.session-card:hover{border-color:var(--border3)}
+.session-icon{font-size:.95rem;width:30px;height:30px;min-width:30px;background:var(--card2);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.session-info{flex:1;min-width:0}
+.session-val{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.session-lbl{font-family:var(--mono);font-size:.48rem;letter-spacing:.08em;color:var(--text3);margin-top:.15rem}
+.session-badge{
+  font-family:var(--mono);font-size:.45rem;padding:1px 5px;border-radius:3px;
+  background:rgba(0,136,255,.08);border:1px solid rgba(0,136,255,.15);color:var(--green);
+  flex-shrink:0;white-space:nowrap;
+}
+.batt-bar-wrap{width:100%;height:3px;background:var(--border);border-radius:999px;margin-top:.35rem;overflow:hidden}
+.batt-bar{height:100%;border-radius:999px;transition:width .5s ease}
 
-    /* Submit Button */
-    .btn-submit {
-      width: 100%;
-      padding: 15px 24px;
-      background: linear-gradient(135deg, #7c5dfa 0%, #5b3fe6 100%);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: .95rem;
-      font-weight: 700;
-      font-family: 'Inter', sans-serif;
-      letter-spacing: .01em;
-      cursor: pointer;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-    }
-    .btn-submit::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
-      opacity: 0;
-      transition: opacity var(--transition);
-    }
-    .btn-submit:hover:not(:disabled)::after { opacity: 1; }
-    .btn-submit:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(124,93,250,0.45);
-    }
-    .btn-submit:active:not(:disabled) { transform: translateY(0); }
-    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+/* ═══════════════════════════════════════════════════════════
+   SECTION
+═══════════════════════════════════════════════════════════ */
+.section{padding:2.25rem 1.25rem;max-width:680px;margin:0 auto}
+.sec-label{font-family:var(--mono);font-size:.54rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.5rem}
+.sec-title{font-size:1.45rem;font-weight:800;margin-bottom:.5rem;letter-spacing:-.02em}
+.sec-body{color:var(--text2);font-size:.85rem;line-height:1.75;margin-bottom:1.5rem}
 
-    .spin { animation: spin 0.75s linear infinite; display: none; }
-    .btn-submit.loading .spin { display: inline-block; }
-    .btn-submit.loading .btn-text { opacity: .7; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+.feature-grid{display:grid;gap:.5rem;grid-template-columns:1fr 1fr}
+.feature-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:1.1rem;transition:all .2s;cursor:default;
+  border-left:3px solid transparent;
+}
+.feature-card:hover{border-color:var(--border3);border-left-color:var(--green);transform:translateY(-1px)}
+.feature-icon{font-size:1.2rem;margin-bottom:.6rem}
+.feature-title{font-size:.82rem;font-weight:700;margin-bottom:.25rem}
+.feature-desc{font-size:.73rem;color:var(--text2);line-height:1.6}
 
-    /* ─── Report Output ──────────────────────────────── */
-    .report-id-label {
-      font-size: .75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-      letter-spacing: .04em;
-    }
-    .report-id-label span { color: var(--violet-light); font-weight: 700; }
+.install-step{display:flex;gap:.85rem;align-items:flex-start;margin-bottom:1rem;position:relative}
+.step-num{
+  width:26px;height:26px;min-width:26px;border-radius:50%;
+  background:var(--card2);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.62rem;color:var(--text2);font-weight:700;
+}
+.step-title{font-size:.82rem;font-weight:600;margin-bottom:.35rem}
+.code-line{
+  background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-sm);
+  padding:.5rem .75rem;font-family:var(--mono);font-size:.66rem;color:var(--cyan);
+  display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+}
+.copy-sm{
+  background:none;border:1px solid var(--border2);color:var(--text3);
+  font-family:var(--mono);font-size:.5rem;padding:2px 7px;border-radius:4px;
+  cursor:pointer;transition:all .15s;min-height:22px;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;flex-shrink:0;
+}
+.copy-sm:hover{color:var(--text);border-color:var(--border3)}
+.copy-sm.ok{color:var(--green);border-color:var(--green)}
 
-    .report-output {
-      width: 100%;
-      min-height: 240px;
-      padding: 16px;
-      background: var(--bg-surface);
-      border: 1.5px solid rgba(255,255,255,0.09);
-      border-radius: var(--radius-md);
-      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-      font-size: .82rem;
-      color: #adb8d4;
-      resize: vertical;
-      transition: border-color var(--transition);
-      outline: none;
-      line-height: 1.7;
-    }
-    .report-output:focus { border-color: rgba(124,93,250,0.4); }
+.price-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:16px;
+  padding:1.75rem;text-align:center;position:relative;overflow:hidden;
+}
+.price-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),var(--cyan),transparent);
+}
+.price-tag{font-family:var(--mono);font-size:.55rem;background:rgba(0,136,255,.08);color:var(--green);border:1px solid rgba(0,136,255,.2);padding:3px 10px;border-radius:999px;display:inline-block;margin-bottom:1rem;letter-spacing:.1em}
+.price-num{font-size:3rem;font-weight:900;letter-spacing:-.04em;background:linear-gradient(135deg,var(--text),var(--text2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.price-sub{font-size:.8rem;color:var(--text2);margin:.25rem 0 1.25rem}
+.price-list{list-style:none;text-align:left;display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.5rem}
+.price-list li{font-size:.8rem;display:flex;align-items:center;gap:.5rem;color:var(--text2)}
+.price-list li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.price-cta{
+  width:100%;padding:.8rem;
+  background:linear-gradient(135deg,var(--green2),var(--green));
+  color:#fff;border:none;border-radius:var(--radius-sm);
+  font-family:var(--sans);font-weight:800;font-size:.85rem;cursor:pointer;
+  transition:all .18s;-webkit-tap-highlight-color:transparent;
+  box-shadow:0 0 20px rgba(0,136,255,.2);
+}
+.price-cta:hover{transform:translateY(-1px);box-shadow:0 0 28px rgba(0,136,255,.4)}
 
-    .report-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-top: 14px;
-    }
-    .btn-action {
-      padding: 11px 12px;
-      border: 1.5px solid transparent;
-      border-radius: var(--radius-sm);
-      font-size: .82rem;
-      font-weight: 600;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      transition: all var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn-action:hover { transform: translateY(-2px); }
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:1rem 0;cursor:pointer;font-size:.86rem;font-weight:600;user-select:none;-webkit-tap-highlight-color:transparent;gap:.5rem}
+.faq-icon{font-size:.65rem;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.faq-item.open .faq-icon{transform:rotate(180deg);color:var(--green)}
+.faq-a{font-size:.8rem;color:var(--text2);line-height:1.75;padding-bottom:1rem;display:none}
+.faq-item.open .faq-a{display:block}
 
-    .btn-copy     { background: rgba(0,212,180,0.12); color: var(--teal); border-color: rgba(0,212,180,0.25); }
-    .btn-copy:hover { background: rgba(0,212,180,0.2); box-shadow: 0 4px 20px rgba(0,212,180,0.2); }
+footer{border-top:1px solid var(--border);padding:2rem 1.25rem;text-align:center;font-size:.68rem;color:var(--text3);font-family:var(--mono);line-height:2}
+footer strong{color:var(--text2)}
 
-    .btn-download { background: rgba(124,93,250,0.12); color: var(--violet-light); border-color: rgba(124,93,250,0.25); }
-    .btn-download:hover { background: rgba(124,93,250,0.2); box-shadow: 0 4px 20px rgba(124,93,250,0.2); }
+/* ═══════════════════════════════════════════════════════════
+   CATEGORIES VIEW
+═══════════════════════════════════════════════════════════ */
+.view-toolbar{
+  position:sticky;top:var(--nav);z-index:100;
+  background:rgba(4,9,15,.95);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:.75rem 1rem;
+}
+.cat-search{
+  width:100%;background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:.65rem 1rem .65rem 2.5rem;
+  font-family:var(--sans);font-size:.82rem;color:var(--text);outline:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%232e4d6a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:.8rem center;
+  transition:border-color .15s;
+}
+.cat-search:focus{border-color:var(--border3)}
+.cat-search::placeholder{color:var(--text3)}
 
-    .btn-clear    { background: rgba(244,91,136,0.1); color: var(--rose); border-color: rgba(244,91,136,0.2); }
-    .btn-clear:hover { background: rgba(244,91,136,0.18); box-shadow: 0 4px 20px rgba(244,91,136,0.15); }
+.cat-list{padding:.75rem 1rem 1.5rem;display:flex;flex-direction:column;gap:.4rem}
+.cat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1rem;display:flex;align-items:center;gap:.85rem;
+  cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;
+  position:relative;overflow:hidden;
+}
+.cat-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--cat-color,var(--green));
+  transform:scaleY(0);transform-origin:center;transition:transform .2s;border-radius:0 2px 2px 0;
+}
+.cat-card:hover{background:var(--card2);border-color:var(--border2)}
+.cat-card:hover::before{transform:scaleY(1)}
+.cat-icon{width:40px;height:40px;min-width:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:var(--card2);border:1px solid var(--border2)}
+.cat-info{flex:1;min-width:0}
+.cat-name{font-size:.9rem;font-weight:700;margin-bottom:.2rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.cat-count{font-family:var(--mono);font-size:.5rem;background:var(--card3);border:1px solid var(--border2);color:var(--text3);padding:2px 7px;border-radius:999px}
+.cat-desc{font-size:.73rem;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cat-arrow{color:var(--text3);flex-shrink:0;opacity:.5;transition:all .2s}
+.cat-card:hover .cat-arrow{color:var(--text);opacity:1;transform:translateX(2px)}
 
-    /* ─── Recent Reports Row ─────────────────────────── */
-    .recent-row {
-      grid-column: 1 / -1;
-      margin-top: 4px;
-    }
+/* ═══════════════════════════════════════════════════════════
+   ENDPOINTS VIEW
+═══════════════════════════════════════════════════════════ */
+.ep-header-bar{
+  display:flex;align-items:center;gap:.65rem;padding:.85rem 1rem;
+  border-bottom:1px solid var(--border);background:var(--bg2);
+  position:sticky;top:var(--nav);z-index:100;flex-wrap:wrap;
+}
+.back-btn{
+  background:var(--card2);border:1px solid var(--border2);color:var(--text2);
+  cursor:pointer;display:flex;align-items:center;gap:.3rem;
+  font-family:var(--sans);font-size:.75rem;font-weight:600;padding:.35rem .75rem;
+  border-radius:999px;transition:all .15s;-webkit-tap-highlight-color:transparent;
+}
+.back-btn:hover{color:var(--text);border-color:var(--border3)}
+.ep-cat-title{font-weight:800;font-size:.9rem}
+.ep-cat-count{font-family:var(--mono);font-size:.55rem;color:var(--text3);background:var(--card);border:1px solid var(--border2);padding:2px 8px;border-radius:999px;margin-left:auto}
 
-    .reports-scroll {
-      max-height: 280px;
-      overflow-y: auto;
-      border-radius: var(--radius-md);
-      background: var(--bg-surface);
-      border: 1.5px solid rgba(255,255,255,0.07);
-    }
-    .reports-scroll::-webkit-scrollbar { width: 6px; }
-    .reports-scroll::-webkit-scrollbar-track { background: transparent; }
-    .reports-scroll::-webkit-scrollbar-thumb { background: rgba(124,93,250,0.3); border-radius: 999px; }
+.ep-search-wrap{padding:.75rem 1rem .3rem}
+.ep-search{
+  width:100%;background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:.6rem .85rem .6rem 2.4rem;
+  font-family:var(--sans);font-size:.8rem;color:var(--text);outline:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' stroke='%232e4d6a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:.75rem center;
+  transition:border-color .15s;
+}
+.ep-search:focus{border-color:var(--border3)}
+.ep-search::placeholder{color:var(--text3)}
+.ep-list{padding:.5rem 1rem 2rem;display:flex;flex-direction:column;gap:.4rem}
 
-    .report-item {
-      display: grid;
-      grid-template-columns: 160px 1fr auto auto;
-      align-items: center;
-      gap: 16px;
-      padding: 14px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      transition: background var(--transition);
-      cursor: pointer;
-    }
-    .report-item:last-child { border-bottom: none; }
-    .report-item:hover { background: rgba(124,93,250,0.06); }
+.ep-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;transition:border-color .15s;
+}
+.ep-card:hover{border-color:var(--border2)}
+.ep-card.open{border-color:var(--border2)}
+.ep-row{display:flex;align-items:center;gap:.6rem;padding:.85rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.method-badge{font-family:var(--mono);font-size:.5rem;font-weight:700;padding:3px 8px;border-radius:5px;flex-shrink:0;letter-spacing:.05em}
+.GET{background:rgba(0,136,255,.08);color:var(--green);border:1px solid rgba(0,136,255,.2)}
+.POST{background:rgba(234,179,8,.08);color:var(--yellow);border:1px solid rgba(234,179,8,.2)}
+.ep-name{font-size:.85rem;font-weight:600;flex:1;min-width:0}
+.ep-path-tiny{font-family:var(--mono);font-size:.6rem;color:var(--text3);padding:.05rem 1rem .6rem;margin-top:-.25rem}
+.ep-chevron{color:var(--text3);font-size:.6rem;transition:transform .22s;flex-shrink:0}
+.ep-card.open .ep-chevron{transform:rotate(180deg);color:var(--green)}
 
-    .ri-phone {
-      font-size: .88rem;
-      font-weight: 700;
-      color: var(--violet-light);
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .ri-reason {
-      font-size: .85rem;
-      color: var(--text-secondary);
-    }
-    .ri-date {
-      font-size: .75rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
+.ep-body{display:none;border-top:1px solid var(--border);padding:.9rem}
+.ep-card.open .ep-body{display:block}
+.ep-sec-label{display:flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.54rem;font-weight:700;color:var(--text3);letter-spacing:.12em;margin-bottom:.7rem;text-transform:uppercase}
+.try-desc{font-size:.76rem;color:var(--text2);margin-bottom:.8rem;line-height:1.6}
 
-    .badge {
-      padding: 3px 12px;
-      border-radius: 999px;
-      font-size: .7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      white-space: nowrap;
-    }
-    .badge-pending  { background: rgba(255,184,108,0.12); color: var(--amber); border: 1px solid rgba(255,184,108,0.2); }
-    .badge-resolved { background: rgba(0,212,100,0.1);   color: #00d464;     border: 1px solid rgba(0,212,100,0.2); }
+.param-row{margin-bottom:.55rem}
+.param-label{font-family:var(--mono);font-size:.6rem;color:var(--text2);margin-bottom:.28rem;display:flex;align-items:center;gap:.3rem}
+.param-req{color:var(--red)}
+.param-opt{color:var(--text3);font-size:.54rem}
+.param-input{
+  width:100%;background:var(--bg);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:.5rem .7rem;
+  font-family:var(--mono);font-size:.7rem;color:var(--text);outline:none;
+  transition:border-color .15s;
+}
+.param-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,136,255,.06)}
+.param-input::placeholder{color:var(--text3)}
+.param-select{
+  width:100%;background:var(--bg);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:.5rem .7rem;
+  font-family:var(--mono);font-size:.7rem;color:var(--text);outline:none;
+  transition:border-color .15s;appearance:none;cursor:pointer;
+}
+.param-select:focus{border-color:var(--green)}
 
-    .empty-state {
-      text-align: center;
-      padding: 44px 20px;
-      color: var(--text-muted);
-      font-size: .9rem;
-    }
-    .empty-state svg { opacity: .3; margin-bottom: 12px; }
+.ep-actions{display:flex;gap:.45rem;margin-top:.8rem}
+.run-btn{
+  flex:1;background:linear-gradient(135deg,var(--green2),var(--green));color:#fff;border:none;
+  border-radius:var(--radius-sm);padding:.6rem 1rem;
+  font-family:var(--sans);font-size:.76rem;font-weight:800;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem;
+  transition:all .18s;min-height:38px;-webkit-tap-highlight-color:transparent;
+}
+.run-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,136,255,.3)}
+.run-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.url-btn{
+  background:var(--card2);border:1px solid var(--border2);border-radius:var(--radius-sm);
+  padding:.6rem .85rem;cursor:pointer;color:var(--text2);font-size:.72rem;
+  transition:all .15s;display:flex;align-items:center;min-height:38px;
+  -webkit-tap-highlight-color:transparent;
+}
+.url-btn:hover{color:var(--text);border-color:var(--border3)}
 
-    /* ─── Toast ──────────────────────────────────────── */
-    .toast {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      padding: 14px 22px;
-      border-radius: var(--radius-md);
-      font-size: .88rem;
-      font-weight: 600;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-      z-index: 9999;
-      transform: translateY(20px);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      backdrop-filter: blur(12px);
-      border: 1px solid transparent;
-      max-width: 340px;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
-    .toast.success { background: rgba(0,180,100,0.18);  border-color: rgba(0,180,100,0.3); color: #00e676; }
-    .toast.error   { background: rgba(244,91,136,0.18); border-color: rgba(244,91,136,0.3); color: var(--rose); }
-    .toast.info    { background: rgba(124,93,250,0.18);  border-color: rgba(124,93,250,0.3); color: var(--violet-light); }
+.result-wrap{display:none;margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border)}
+.result-wrap.show{display:block}
+.result-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem;flex-wrap:wrap;gap:.35rem}
+.result-badge{font-family:var(--mono);font-size:.56rem;padding:3px 9px;border-radius:999px}
+.result-badge.ok{background:rgba(0,136,255,.08);color:var(--green);border:1px solid rgba(0,136,255,.18)}
+.result-badge.err{background:rgba(239,68,68,.08);color:var(--red);border:1px solid rgba(239,68,68,.18)}
+.result-badge.info{background:rgba(0,204,255,.08);color:var(--cyan);border:1px solid rgba(0,204,255,.18)}
+.result-copy{font-family:var(--mono);font-size:.52rem;color:var(--text2);background:var(--card2);border:1px solid var(--border2);padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .15s;min-height:24px;-webkit-tap-highlight-color:transparent}
+.result-copy:hover{color:var(--text);border-color:var(--border3)}
+.result-copy.ok{color:var(--green);border-color:var(--green)}
+.result-pre{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:.65rem;font-family:var(--mono);font-size:.6rem;line-height:1.8;
+  color:#94a3b8;max-height:220px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;
+}
+.result-pre.error{border-color:rgba(239,68,68,.25);color:var(--red)}
+.spinner{display:inline-block;width:9px;height:9px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
 
-    /* ─── Footer info ────────────────────────────────── */
-    .api-footer {
-      position: fixed;
-      bottom: 12px;
-      left: 16px;
-      font-size: .68rem;
-      color: rgba(255,255,255,0.18);
-      background: rgba(0,0,0,0.4);
-      padding: 4px 12px;
-      border-radius: 999px;
-      backdrop-filter: blur(8px);
-      z-index: 100;
-    }
+.ep-divider{border:none;border-top:1px solid var(--border);margin:.9rem 0}
+.resp-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.65rem;font-family:var(--mono);font-size:.6rem;line-height:1.8;color:#94a3b8;max-height:140px;overflow-y:auto;margin-top:.4rem}
 
-    /* ─── Slide-in animation ─────────────────────────── */
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .slide-in { animation: slideUp 0.42s cubic-bezier(0.22,1,0.36,1) forwards; }
+.status-table{width:100%;border-collapse:collapse;font-size:.74rem}
+.status-table th{text-align:left;font-family:var(--mono);font-size:.52rem;color:var(--text3);letter-spacing:.1em;padding:.35rem .4rem;border-bottom:1px solid var(--border)}
+.status-table td{padding:.42rem .4rem;border-bottom:1px solid rgba(15,32,53,.6);vertical-align:middle;color:var(--text2)}
+.sc{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:.66rem;font-weight:700}
+.sc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.s200{color:var(--green)}.s200 .sc-dot{background:var(--green);box-shadow:0 0 5px var(--green)}
+.s400,.s500{color:var(--red)}.s400 .sc-dot,.s500 .sc-dot{background:var(--red)}
 
-    /* ─── Responsive ─────────────────────────────────── */
-    @media (max-width: 900px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-      .main-grid { grid-template-columns: 1fr; }
-      .report-item { grid-template-columns: 1fr 1fr; }
-      .ri-date, .ri-reason { display: none; }
-    }
-    @media (max-width: 540px) {
-      .page { padding: 20px 14px 60px; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .card { padding: 22px 18px; }
-      .report-actions { grid-template-columns: 1fr; }
-    }
-  </style>
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:400px){
+  .hero h1{font-size:1.75rem}
+  .feature-grid{grid-template-columns:1fr}
+  .session-grid{grid-template-columns:1fr}
+  .ai-panel{width:calc(100vw - 2rem);right:1rem}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MUSIC PLAYER
+═══════════════════════════════════════════════════════════ */
+.music-player{
+  position:fixed;bottom:1.25rem;right:1.25rem;z-index:500;
+  display:flex;align-items:center;gap:0;
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:999px;box-shadow:0 8px 30px rgba(0,0,0,.6);
+  overflow:hidden;transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+.music-player.playing{border-color:rgba(0,136,255,.4);box-shadow:0 0 0 2px rgba(0,136,255,.1),0 8px 30px rgba(0,0,0,.6)}
+.music-ctrl{
+  background:none;border:none;color:var(--text2);cursor:pointer;
+  height:46px;display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;transition:all .2s;-webkit-tap-highlight-color:transparent;
+  width:0;overflow:hidden;opacity:0;padding:0;
+}
+.music-player.playing .music-ctrl{width:34px;opacity:1}
+.music-ctrl:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.music-btn{
+  width:46px;height:46px;min-width:46px;
+  background:none;border:none;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;
+}
+.music-icon-play{display:block}
+.music-icon-pause{display:none}
+.music-player.playing .music-icon-play{display:none}
+.music-player.playing .music-icon-pause{display:block}
+.music-bars{display:none;position:absolute;bottom:2px;left:50%;transform:translateX(-50%);gap:2px;align-items:flex-end;height:6px}
+.music-player.playing .music-bars{display:flex}
+.music-bar{width:2.5px;border-radius:2px;background:var(--green);animation:bar-bounce .55s ease-in-out infinite alternate}
+.music-bar:nth-child(1){height:3px;animation-delay:0s}
+.music-bar:nth-child(2){height:6px;animation-delay:.18s}
+.music-bar:nth-child(3){height:4px;animation-delay:.35s}
+@keyframes bar-bounce{to{height:8px;opacity:.5}}
+.music-counter{
+  font-family:var(--mono);font-size:.5rem;color:var(--text3);
+  padding-right:.85rem;white-space:nowrap;
+  width:0;overflow:hidden;opacity:0;transition:all .25s ease;
+}
+.music-player.playing .music-counter{width:auto;opacity:1;min-width:26px}
+</style>
 </head>
 <body>
 
-  <!-- Background layers -->
-  <div class="bg-mesh"></div>
-  <div class="dots" id="dotsLayer"></div>
+<!-- LOADING SCREEN — Spinner -->
+<div id="loader">
+  <div class="ld-logo">
+    <div class="ld-logo-mark">TC</div>
+    <div>
+      <div class="ld-logo-text">TRASHCORE API</div>
+      <div class="ld-logo-sub">DOCUMENTATION v2.4.0</div>
+    </div>
+  </div>
 
-  <div class="page">
+  <div class="ld-spinner-wrap">
+    <svg class="ld-spinner-svg" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#005fcc"/>
+          <stop offset="100%" style="stop-color:#00ccff"/>
+        </linearGradient>
+      </defs>
+      <circle class="ld-spinner-track" cx="55" cy="55" r="52"/>
+      <circle class="ld-spinner-fill" id="ld-arc" cx="55" cy="55" r="52"/>
+    </svg>
+    <div>
+      <div class="ld-pct" id="ld-pct-label">0%</div>
+      <div class="ld-pct-sub">Loading</div>
+    </div>
+  </div>
 
-    <!-- ── Header ────────────────────────────────────── -->
-    <header class="header">
-      <div class="header-pill">
-        <span class="dot-live"></span>
-        Report &amp; Conquer
-      </div>
-      <h1 class="site-title">WhatsApp Report Assistant</h1>
-      <p class="site-tagline">By <strong>Lord Diego</strong> — The Father of Bans 👑</p>
-      <div class="conn-status connecting" id="connectionStatus">
-        <span class="indicator"></span>
-        <span id="connLabel">Connecting…</span>
-      </div>
-    </header>
+  <div class="ld-status-text" id="ld-status-text">Initializing <span>runtime environment</span>...</div>
 
-    <!-- ── Stats ──────────────────────────────────────── -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon-wrap violet">📊</div>
-        <div class="stat-number" id="totalReports">—</div>
-        <div class="stat-label">Total Reports</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon-wrap teal">📱</div>
-        <div class="stat-number" id="uniqueNumbers">—</div>
-        <div class="stat-label">Unique Numbers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon-wrap rose">🔥</div>
-        <div class="stat-number" id="reportsToday">—</div>
-        <div class="stat-label">Reports Today</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon-wrap amber">🏆</div>
-        <div class="stat-number" id="banRate">—</div>
-        <div class="stat-label">Ban Rate</div>
-      </div>
+  <div class="ld-meta-row">
+    <div class="ld-meta-item"><div class="ld-meta-val" id="lm-ping">--</div><div class="ld-meta-lbl">Ping ms</div></div>
+    <div class="ld-meta-item"><div class="ld-meta-val" id="lm-status">--</div><div class="ld-meta-lbl">Status</div></div>
+    <div class="ld-meta-item"><div class="ld-meta-val" id="lm-pct">0%</div><div class="ld-meta-lbl">Progress</div></div>
+    <div class="ld-meta-item"><div class="ld-meta-val" id="lm-time">0s</div><div class="ld-meta-lbl">Elapsed</div></div>
+  </div>
+</div>
+
+<!-- BROWSE OVERLAY -->
+<div id="browse-overlay">
+  <div class="bo-icon" id="bo-icon">📡</div>
+  <div>
+    <div class="bo-title">Accessing <span class="bo-cat" id="bo-cat-name"></span></div>
+    <div style="font-family:var(--mono);font-size:.55rem;color:var(--text3);text-align:center;margin-top:.35rem">Browsing your API...</div>
+  </div>
+  <div class="bo-bar-wrap"><div class="bo-bar" id="bo-bar"></div></div>
+  <div class="bo-pct" id="bo-pct">0%</div>
+  <div class="bo-steps" id="bo-steps">
+    <div class="bo-step" id="bs0"><div class="bo-step-dot"></div>Fetching route map</div>
+    <div class="bo-step" id="bs1"><div class="bo-step-dot"></div>Loading endpoint documentation</div>
+    <div class="bo-step" id="bs2"><div class="bo-step-dot"></div>Validating parameter schemas</div>
+    <div class="bo-step" id="bs3"><div class="bo-step-dot"></div>Building interactive playground</div>
+    <div class="bo-step" id="bs4"><div class="bo-step-dot"></div>Rendering category view</div>
+  </div>
+  <div class="bo-msg" id="bo-msg">Connecting to endpoint registry...</div>
+</div>
+
+<!-- AUDIO -->
+<audio id="bg-music" loop></audio>
+
+<!-- MUSIC PLAYER -->
+<div class="music-player" id="music-player">
+  <button class="music-ctrl" id="music-prev" onclick="musicPrev()" title="Previous">&#9664;</button>
+  <button class="music-btn" id="music-btn" onclick="toggleMusic()" aria-label="Toggle music">
+    <svg class="music-icon-play" width="15" height="15" viewBox="0 0 24 24" fill="var(--text)" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    <svg class="music-icon-pause" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/></svg>
+    <div class="music-bars"><div class="music-bar"></div><div class="music-bar"></div><div class="music-bar"></div></div>
+  </button>
+  <button class="music-ctrl" id="music-next" onclick="musicNext()" title="Next">&#9654;</button>
+  <div class="music-counter" id="music-counter">1/4</div>
+</div>
+
+<!-- AI FAB -->
+<button class="ai-fab" id="ai-fab" onclick="toggleAI()" title="AI Assistant">🤖</button>
+
+<!-- AI PANEL -->
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-panel-dot"></div>
+    <div class="ai-panel-title">Trashcore AI</div>
+    <button class="ai-panel-close" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="ai-messages">
+    <div class="ai-msg bot">
+      <div class="ai-msg-label">AI Assistant</div>
+      Hey! I can answer questions about the Trashcore API — endpoints, usage, rate limits, AI models, downloaders, and more. What do you need? 💙
+    </div>
+  </div>
+  <div class="ai-quick-btns" id="ai-quick-btns">
+    <button class="ai-quick-btn" onclick="aiAsk('How do I call an API endpoint?')">How to call?</button>
+    <button class="ai-quick-btn" onclick="aiAsk('What AI models are supported?')">AI models?</button>
+    <button class="ai-quick-btn" onclick="aiAsk('Is there a rate limit?')">Rate limits?</button>
+    <button class="ai-quick-btn" onclick="aiAsk('How do I contact support?')">Support?</button>
+  </div>
+  <div class="ai-input-row">
+    <input class="ai-input" id="ai-input" type="text" placeholder="Ask about the API..." onkeydown="if(event.key==='Enter') aiSend()"/>
+    <button class="ai-send-btn" onclick="aiSend()">SEND</button>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="drawer-brand">
+      <div class="drawer-logo-mark">TC</div>
+      <div><div class="drawer-title">Trashcore API</div><div class="drawer-sub">Free &amp; Open API Platform</div></div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div style="flex:1;overflow-y:auto">
+    <div class="drawer-section">Navigation</div>
+    <div class="drawer-nav">
+      <button class="drawer-link" onclick="showView('categories');closeDrawer()">
+        <span class="drawer-link-icon">📦</span> Browse Endpoints
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button class="drawer-link" onclick="goToSection('session')">
+        <span class="drawer-link-icon">📡</span> My Session
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button class="drawer-link" onclick="goToSection('stats')">
+        <span class="drawer-link-icon">📊</span> Statistics
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button class="drawer-link" onclick="goToSection('pricing')">
+        <span class="drawer-link-icon">💰</span> Pricing
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button class="drawer-link" onclick="goToSection('install')">
+        <span class="drawer-link-icon">⚙️</span> Install Guide
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
 
-    <!-- ── Main Grid ──────────────────────────────────── -->
-    <div class="main-grid">
+    <div class="drawer-divider"></div>
+    <div class="drawer-section">Contact &amp; Support</div>
+    <div class="drawer-nav">
+      <a class="drawer-link" href="https://wa.me/254787909276" target="_blank" rel="noopener">
+        <span class="drawer-link-icon">💬</span> WhatsApp
+        <span style="font-size:.6rem;color:var(--text3);font-family:var(--mono)">+254 787 909 276</span>
+      </a>
+      <a class="drawer-link" href="https://t.me/trashcoredev2" target="_blank" rel="noopener">
+        <span class="drawer-link-icon">✈</span> Telegram
+        <span style="font-size:.6rem;color:var(--text3);font-family:var(--mono)">@trashcoredev2</span>
+      </a>
+      <button class="drawer-link" onclick="toggleAI();closeDrawer()">
+        <span class="drawer-link-icon">🤖</span> AI Assistant
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
 
-      <!-- Form Card -->
-      <div class="card">
-        <div class="card-title">
-          <span class="icon">📝</span>
-          New Report
-        </div>
-        <form id="reportForm" novalidate>
-          <div class="form-group">
-            <label for="phone">Phone Number <span class="required">*</span></label>
-            <input type="tel" id="phone" name="phone" placeholder="+1 234 567 8900" required autocomplete="tel">
-            <div class="error-msg" id="phoneError">Please enter a valid phone number (10–15 digits)</div>
-          </div>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section">Display</div>
+    <div class="drawer-nav">
+      <button class="drawer-link" id="theme-drawer-btn" onclick="toggleTheme();closeDrawer()">
+        <span class="drawer-link-icon" id="theme-drawer-icon">🌙</span>
+        <span id="theme-drawer-label">Light Mode</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
 
-          <div class="form-group">
-            <label for="reason">Reason <span class="required">*</span></label>
-            <select id="reason" name="reason" required>
-              <option value="">Select a reason…</option>
-              <option value="Spam">📨  Spam</option>
-              <option value="Scam">🎣  Scam</option>
-              <option value="Harassment">😤  Harassment</option>
-              <option value="Impersonation">🎭  Impersonation</option>
-              <option value="Other">❓  Other</option>
-            </select>
-            <div class="error-msg" id="reasonError">Please select a reason</div>
-          </div>
+  <div class="drawer-follow">
+    <div><div style="font-size:.88rem;font-weight:700">Community</div><div style="font-size:.68rem;color:var(--text2);margin-top:.15rem">@Trashcore-chat</div></div>
+    <button class="drawer-follow-btn" onclick="window.open('https://discord.gg/FTXKVSZUb','_blank')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+  </div>
+</div>
 
-          <div class="form-group">
-            <label for="description">Description <span class="required">*</span></label>
-            <textarea id="description" name="description" placeholder="Describe the violation in detail (minimum 10 characters)…" required></textarea>
-            <div class="error-msg" id="descriptionError">Please provide a description (minimum 10 characters)</div>
-          </div>
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-burger" onclick="openDrawer()"><span></span><span></span><span></span></button>
+  <div class="nav-logo">
+    <div class="nav-logo-mark">TC</div>
+    <div class="nav-logo-text">Trashcore <em>API</em></div>
+  </div>
+  <div class="nav-ping" id="nav-ping">--ms</div>
+  <div class="nav-status"><div class="nav-status-dot"></div>ONLINE</div>
+  <button class="theme-toggle-nav" id="theme-nav-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  <span class="nav-badge">v2.4.0</span>
+</nav>
 
-          <button type="submit" class="btn-submit" id="submitBtn">
-            <span class="btn-text">⚡ Generate Report</span>
-            <span class="spin">↻</span>
-          </button>
-        </form>
+<!-- HOME VIEW -->
+<div class="view active" id="view-home">
+  <div class="hero-wrap">
+    <div class="hero-glow"></div>
+    <div class="hero">
+      <div class="hero-tag"><span class="hero-tag-dot"></span>Production-Ready Free API — v2.4.0</div>
+      <h1>The API Platform Built for <span class="grad">Builders Who Ship</span></h1>
+      <p>142 endpoints across AI, downloaders, search, social, tools and more. Zero auth, zero cost, infinite requests.</p>
+      <div class="hero-btns">
+        <button class="btn btn-primary" onclick="openCatWithProgress('downloader')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          Explore Endpoints
+        </button>
+        <button class="btn btn-ghost" onclick="goToSection('install')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Setup Guide
+        </button>
       </div>
+    </div>
+  </div>
 
-      <!-- Report Output Card -->
-      <div class="card" id="reportSection" style="display:none;">
-        <div class="card-title">
-          <span class="icon">📄</span>
-          Generated Report
+  <div class="stats-bar" id="stats">
+    <div class="sbar-item"><div class="sbar-n g">142</div><div class="sbar-l">Endpoints</div></div>
+    <div class="sbar-item"><div class="sbar-n c">8</div><div class="sbar-l">Categories</div></div>
+    <div class="sbar-item"><div class="sbar-n y" id="sb-reqs">0</div><div class="sbar-l">Requests Made</div></div>
+    <div class="sbar-item"><div class="sbar-n p" id="sb-explored">0</div><div class="sbar-l">Explored</div></div>
+    <div class="sbar-item"><div class="sbar-n o" id="sb-ping">--</div><div class="sbar-l">Ping ms</div></div>
+  </div>
+
+  <div class="section" id="session" style="padding-top:1.5rem;padding-bottom:0">
+    <div class="panel-header">
+      <div class="panel-header-dot"></div>
+      <div class="panel-title">Your Session</div>
+      <div class="panel-subtitle" id="session-time-lbl">Session: 00:00</div>
+    </div>
+    <div class="session-grid">
+      <div class="session-card"><div class="session-icon">🌐</div><div class="session-info"><div class="session-val" id="s-ip">Detecting...</div><div class="session-lbl">IP ADDRESS</div></div></div>
+      <div class="session-card"><div class="session-icon">📡</div><div class="session-info"><div class="session-val" id="s-ping">--ms</div><div class="session-lbl">SERVER PING</div></div><div class="session-badge" id="s-ping-badge">GOOD</div></div>
+      <div class="session-card"><div class="session-icon">🔋</div><div class="session-info"><div class="session-val" id="s-batt">--</div><div class="session-lbl">BATTERY LEVEL</div><div class="batt-bar-wrap"><div class="batt-bar" id="batt-bar" style="width:0%;background:var(--green)"></div></div></div><div class="session-badge" id="s-batt-badge">--</div></div>
+      <div class="session-card"><div class="session-icon">⏱️</div><div class="session-info"><div class="session-val" id="s-session">00:00</div><div class="session-lbl">SESSION TIME</div></div></div>
+      <div class="session-card"><div class="session-icon">🔢</div><div class="session-info"><div class="session-val" id="s-reqs">0</div><div class="session-lbl">REQUESTS MADE</div></div><div class="session-badge" id="s-reqs-badge" style="display:none">NEW</div></div>
+      <div class="session-card"><div class="session-icon">🗺️</div><div class="session-info"><div class="session-val" id="s-region">--</div><div class="session-lbl">REGION / ISP</div></div></div>
+      <div class="session-card"><div class="session-icon">🖥️</div><div class="session-info"><div class="session-val" id="s-browser">--</div><div class="session-lbl">BROWSER / OS</div></div></div>
+      <div class="session-card"><div class="session-icon">🗂️</div><div class="session-info"><div class="session-val" id="s-explored">0 / 8</div><div class="session-lbl">CATEGORIES VISITED</div></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">Why Trashcore API?</div>
+    <div class="sec-title">Built for Speed. Designed for Simplicity.</div>
+    <div class="sec-body">Drop-in REST API for bots, apps and automation — no API keys, no rate limits, no surprises.</div>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Endpoints</div><div class="feature-desc">GPT-4o-mini, o3-mini, Groq Llama, Gemini, Perplexity, DeepSeek, TTS voices and Whisper STT.</div></div>
+      <div class="feature-card"><div class="feature-icon">⬇️</div><div class="feature-title">31 Downloaders</div><div class="feature-desc">YouTube, Spotify, TikTok, Facebook, Instagram, SoundCloud, CapCut and more.</div></div>
+      <div class="feature-card"><div class="feature-icon">🔓</div><div class="feature-title">No Auth Required</div><div class="feature-desc">Zero friction — no keys, no headers, just make the request.</div></div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Always Online</div><div class="feature-desc">24/7 availability with automatic failovers and fallbacks.</div></div>
+    </div>
+  </div>
+
+  <div class="section" id="install">
+    <div class="sec-label">Get Started</div>
+    <div class="sec-title">Up and Running in 2 Minutes</div>
+    <div class="install-step"><div class="step-num">1</div><div style="flex:1"><div class="step-title">Install Dependencies</div><div class="code-line"><span>npm install express cors @trashcore/trash-api multer</span><button class="copy-sm" onclick="copyLine(this,'npm install express cors @trashcore/trash-api multer')">copy</button></div></div></div>
+    <div class="install-step"><div class="step-num">2</div><div style="flex:1"><div class="step-title">Start the Server</div><div class="code-line"><span>node server.js</span><button class="copy-sm" onclick="copyLine(this,'node server.js')">copy</button></div></div></div>
+    <div class="install-step"><div class="step-num">3</div><div style="flex:1"><div class="step-title">Test a Route</div><div class="code-line"><span>/tools/weather?city=London</span><button class="copy-sm" onclick="copyLine(this,API_BASE_URL+'/tools/weather?city=London')">copy</button></div></div></div>
+    <div class="install-step"><div class="step-num">4</div><div style="flex:1"><div class="step-title">Try AI Chat</div><div class="code-line"><span>/ai/gpt?prompt=Hello+world</span><button class="copy-sm" onclick="copyLine(this,API_BASE_URL+'/ai/gpt?prompt=Hello+world')">copy</button></div></div></div>
+  </div>
+
+  <div class="section" id="pricing">
+    <div class="sec-label">Pricing</div>
+    <div class="sec-title">Free. Forever.</div>
+    <div class="sec-body">No hidden fees, no rate limits, no credit card required.</div>
+    <div class="price-card">
+      <div class="price-tag">RECOMMENDED PLAN</div>
+      <div class="price-num">$0</div>
+      <div class="price-sub">Everything you need to build and ship at scale.</div>
+      <ul class="price-list">
+        <li>Unlimited API Requests</li>
+        <li>No API Key or Auth Required</li>
+        <li>All 142 Endpoints Included</li>
+        <li>AI, Downloaders, Social, Ephoto &amp; Tools</li>
+        <li>JSON + Binary Responses</li>
+        <li>Production-Grade Uptime</li>
+      </ul>
+      <button class="price-cta" onclick="showView('categories')">Start Building Now →</button>
+    </div>
+  </div>
+
+  <div class="section" id="changelog">
+    <div class="sec-label">What's New</div>
+    <div class="sec-title">Changelog</div>
+    <div class="sec-body">Version history and release notes for Trashcore API.</div>
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+      <div style="background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:1.1rem;border-left:3px solid var(--green)">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text)">v2.4.0</span>
+          <span style="font-family:var(--mono);font-size:.52rem;background:rgba(0,136,255,.08);color:var(--green);border:1px solid rgba(0,136,255,.2);padding:2px 8px;border-radius:999px">LATEST</span>
+          <span style="font-family:var(--mono);font-size:.52rem;color:var(--text3);margin-left:auto">2025</span>
         </div>
-        <div class="report-id-label" id="reportIdDisplay"></div>
-        <textarea class="report-output" id="reportOutput" readonly rows="12"></textarea>
-        <div class="report-actions">
-          <button class="btn-action btn-copy" id="copyBtn">📋 Copy</button>
-          <button class="btn-action btn-download" id="downloadBtn">💾 Download</button>
-          <button class="btn-action btn-clear" id="clearBtn">🗑 Clear</button>
-        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:.4rem">
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/ai/gemini</strong> — Google Gemini chat with optional multi-turn session support</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/search/shazam</strong> — Song recognition via audio URL (GET) or file upload (POST)</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--cyan);font-weight:700;flex-shrink:0">↑</span>Total endpoints: <strong style="color:var(--text)">139 → 142</strong></li>
+        </ul>
       </div>
-
-      <!-- Recent Reports -->
-      <div class="card recent-row">
-        <div class="card-title">
-          <span class="icon">🕒</span>
-          Recent Reports
+      <div style="background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:1.1rem;border-left:3px solid var(--green)">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text)">v2.4.0</span>
+          <span style="font-family:var(--mono);font-size:.52rem;color:var(--text3);margin-left:auto">2025</span>
         </div>
-        <div class="reports-scroll">
-          <div class="reports-list" id="recentReportsList">
-            <div class="empty-state">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-              <p>Loading reports…</p>
-            </div>
-          </div>
-        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:.4rem">
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/downloader/ytv4</strong> — YouTube V4 direct download (audio or video) by URL</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/downloader/ytv4play</strong> — YouTube V4 search + download (audio or video) by query</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--cyan);font-weight:700;flex-shrink:0">↑</span>Total endpoints: <strong style="color:var(--text)">137 → 142</strong></li>
+        </ul>
       </div>
-
-    </div><!-- /main-grid -->
-  </div><!-- /page -->
-
-  <div class="toast" id="toast"></div>
-  <div class="api-footer" id="apiInfo">API: —</div>
-
-  <script>
-    /* ══════════════════════════════════════════════════
-       CONFIGURATION
-    ══════════════════════════════════════════════════ */
-    const CONFIG = {
-      API_URL: 'https://wa-reporter-jo98.onrender.com',
-      endpoints: {
-        stats:          '/api/stats',
-        generateReport: '/api/generate-report',
-        validatePhone:  '/api/validate-phone',
-        recentReports:  '/api/recent-reports',
-        health:         '/api/health'
-      }
-    };
-
-    const API_URL = CONFIG.API_URL;
-    document.getElementById('apiInfo').textContent = `API: ${API_URL}`;
-
-    /* ─── Floating dots ─── */
-    (function() {
-      const layer = document.getElementById('dotsLayer');
-      for (let i = 0; i < 22; i++) {
-        const d = document.createElement('div');
-        d.className = 'dot';
-        const size = 2 + Math.random() * 3;
-        d.style.cssText = [
-          `left:${Math.random()*100}%`,
-          `width:${size}px`,
-          `height:${size}px`,
-          `animation-duration:${18+Math.random()*28}s`,
-          `animation-delay:${Math.random()*30}s`,
-          `opacity:0`
-        ].join(';');
-        layer.appendChild(d);
-      }
-    })();
-
-    /* ─── Toast ─── */
-    function showToast(msg, type = 'success') {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'toast ' + type + ' show';
-      clearTimeout(t._t);
-      t._t = setTimeout(() => t.classList.remove('show'), 3200);
-    }
-
-    /* ─── Connection status ─── */
-    function setStatus(state) {
-      const el = document.getElementById('connectionStatus');
-      const lbl = document.getElementById('connLabel');
-      el.className = 'conn-status ' + state;
-      lbl.textContent = state === 'online' ? 'Online' : state === 'offline' ? 'Offline' : 'Connecting…';
-    }
-
-    /* ─── Health check ─── */
-    async function checkHealth() {
-      try {
-        const r = await fetch(`${API_URL}${CONFIG.endpoints.health}`);
-        if (r.ok) { setStatus('online'); return true; }
-        throw new Error();
-      } catch { setStatus('offline'); return false; }
-    }
-
-    /* ─── Load stats ─── */
-    async function loadStats() {
-      try {
-        const r = await fetch(`${API_URL}${CONFIG.endpoints.stats}`);
-        const d = await r.json();
-        if (d.success) {
-          animateCount('totalReports',  d.stats.total_reports  || 0);
-          animateCount('uniqueNumbers', d.stats.unique_numbers || 0);
-          animateCount('reportsToday',  d.stats.reports_today  || 0);
-          const rate = d.stats.total_reports > 0
-            ? Math.min(100, Math.round((d.stats.unique_numbers / d.stats.total_reports) * 100))
-            : 0;
-          document.getElementById('banRate').textContent = rate + '%';
-          renderRecentReports(d.recentReports);
-          setStatus('online');
-          return true;
-        }
-      } catch { setStatus('offline'); }
-      return false;
-    }
-
-    function animateCount(id, target) {
-      const el = document.getElementById(id);
-      const start = parseInt(el.textContent) || 0;
-      if (start === target) return;
-      let n = start;
-      const step = Math.ceil(Math.abs(target - start) / 25);
-      const dir = target > start ? 1 : -1;
-      const iv = setInterval(() => {
-        n += dir * step;
-        if ((dir > 0 && n >= target) || (dir < 0 && n <= target)) { n = target; clearInterval(iv); }
-        el.textContent = n;
-      }, 30);
-    }
-
-    function renderRecentReports(reports) {
-      const c = document.getElementById('recentReportsList');
-      if (!reports || !reports.length) {
-        c.innerHTML = `<div class="empty-state"><p>No reports yet — be the first! 🚀</p></div>`;
-        return;
-      }
-      c.innerHTML = reports.map(r => `
-        <div class="report-item">
-          <span class="ri-phone">📱 ${r.phone_number}</span>
-          <span class="ri-reason">${r.reason}</span>
-          <span class="badge badge-${(r.status||'pending').toLowerCase()}">${r.status||'Pending'}</span>
-          <span class="ri-date">${new Date(r.created_at).toLocaleString()}</span>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;border-left:3px solid var(--border3)">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text)">v2.2.0</span>
+          <span style="font-family:var(--mono);font-size:.52rem;color:var(--text3);margin-left:auto">2025</span>
         </div>
-      `).join('');
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:.4rem">
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/search/youtube</strong> — YouTube search with thumbnails, durations &amp; channel info</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/downloader/ytmp3v1, /ytmp4v1, /video, /ytv, /facebookv2, /igdlv2</strong> — 6 missing downloader routes</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/fun/truth, /dare, /wyr, /quote, /quoteaudio, /bible, /quran</strong> — 7 fun endpoints</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/ai/deepseek</strong> — DeepSeek chat with optional thinking mode</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--cyan);font-weight:700;flex-shrink:0">↑</span>Total endpoints: <strong style="color:var(--text)">125 → 137</strong></li>
+        </ul>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;border-left:3px solid var(--border3)">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text)">v2.1.0</span>
+          <span style="font-family:var(--mono);font-size:.52rem;color:var(--text3);margin-left:auto">2025</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:.4rem">
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/ai/perplexity</strong> — AI web search with mode &amp; focus controls</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/ai/perplexity/news</strong> — Perplexity pre-focused on news sources</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Added <strong style="color:var(--text)">/downloader/terabox</strong> — Terabox file download support</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--cyan);font-weight:700;flex-shrink:0">↑</span>Total endpoints: <strong style="color:var(--text)">122 → 125</strong></li>
+        </ul>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem;border-left:3px solid var(--border3)">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text)">v2.0.1</span>
+          <span style="font-family:var(--mono);font-size:.52rem;color:var(--text3);margin-left:auto">2025</span>
+        </div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:.4rem">
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>122 endpoints across 8 categories</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>AI: GPT-4o-mini, o3-mini, Groq Llama, Pollinations, Claude, Scite, Flux, TTS, Whisper</li>
+          <li style="font-size:.78rem;color:var(--text2);display:flex;align-items:flex-start;gap:.5rem"><span style="color:var(--green);font-weight:700;flex-shrink:0">+</span>Downloaders: YouTube (9 variants), Spotify (3), TikTok, Instagram, Facebook, Twitter and more</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">FAQ</div>
+    <div class="sec-title">Frequently Asked Questions</div>
+    <div style="margin-top:1.25rem">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this.parentElement)">What is Trashcore API?<span class="faq-icon">▼</span></div><div class="faq-a">A free REST API providing AI chat, media downloaders, social scrapers, weather, ephoto text effects and more — built for bots, apps and automation.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this.parentElement)">Is there a rate limit?<span class="faq-icon">▼</span></div><div class="faq-a">No. There are no rate limits and no API keys required. Just make requests freely.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this.parentElement)">What AI models are supported?<span class="faq-icon">▼</span></div><div class="faq-a">GPT-4o-mini, o3-mini, Groq Llama 3.3 70B, Pollinations OpenAI, Perplexity (turbo, claude, gpt-4o, sonar), Whisper STT, and TTS with multiple voices.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this.parentElement)">What languages can I use?<span class="faq-icon">▼</span></div><div class="faq-a">Any language that can make HTTP requests — Node.js, Python, PHP, Java, Dart, curl, and more.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this.parentElement)">How do I contact support?<span class="faq-icon">▼</span></div><div class="faq-a">Reach us on WhatsApp (+254 787 909 276) or Telegram (@trashcoredev2). You can also open the menu and tap the contact links directly.</div></div>
+    </div>
+  </div>
+
+  <footer>
+    Built with ♥ by <strong>TrashX / Trashcore</strong> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; No auth required<br>
+    © 2025 Trashcore API · All rights reserved &nbsp;·&nbsp;
+    <a href="https://wa.me/254787909276" style="color:var(--green);text-decoration:none">WhatsApp</a> &nbsp;·&nbsp;
+    <a href="https://t.me/trashcoredev2" style="color:var(--cyan);text-decoration:none">Telegram</a> &nbsp;·&nbsp;
+    <span id="footer-ping" style="color:var(--text3)">ping: --ms</span>
+  </footer>
+</div>
+
+<!-- CATEGORIES VIEW -->
+<div class="view" id="view-categories">
+  <div class="view-toolbar"><input class="cat-search" id="cat-search" type="text" placeholder="Search categories..." oninput="filterCategories(this.value)"/></div>
+  <div class="cat-list" id="cat-list"></div>
+  <footer>Built with ♥ by <strong>Trashcore</strong> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; <a href="https://wa.me/254787909276" style="color:var(--green);text-decoration:none">WhatsApp</a> &nbsp;·&nbsp; <a href="https://t.me/trashcoredev2" style="color:var(--cyan);text-decoration:none">Telegram</a></footer>
+</div>
+
+<!-- ENDPOINTS VIEW -->
+<div class="view" id="view-endpoints">
+  <div class="ep-header-bar">
+    <button class="back-btn" onclick="showView('categories')">← Back</button>
+    <span class="ep-cat-title" id="ep-cat-title"></span>
+    <span class="ep-cat-count" id="ep-cat-count"></span>
+  </div>
+  <div class="ep-search-wrap"><input class="ep-search" id="ep-search" type="text" placeholder="Search endpoints..." oninput="filterEndpoints(this.value)"/></div>
+  <div class="ep-list" id="ep-list"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  API CONFIG — points at your backend (Railway/Render/etc.)
+// ══════════════════════════════════════════════════════════
+const API_BASE_URL = 'https://apis-production-828f.up.railway.app'
+
+// ══════════════════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════════════════
+(function initTheme(){
+  try{
+    const saved = localStorage.getItem('tc-api-theme')
+    if(saved==='light') applyTheme('light', false)
+  }catch(e){ /* localStorage blocked (e.g. file:// preview) — ignore */ }
+})()
+
+function applyTheme(mode, animate){
+  const html = document.documentElement
+  const navBtn = document.getElementById('theme-nav-btn')
+  const drawerIcon = document.getElementById('theme-drawer-icon')
+  const drawerLabel = document.getElementById('theme-drawer-label')
+  if(mode==='light'){
+    html.setAttribute('data-theme','light')
+    if(navBtn) navBtn.textContent='☀️'
+    if(drawerIcon) drawerIcon.textContent='🌙'
+    if(drawerLabel) drawerLabel.textContent='Dark Mode'
+    try{ localStorage.setItem('tc-api-theme','light') }catch(e){}
+  } else {
+    html.removeAttribute('data-theme')
+    if(navBtn) navBtn.textContent='🌙'
+    if(drawerIcon) drawerIcon.textContent='☀️'
+    if(drawerLabel) drawerLabel.textContent='Light Mode'
+    try{ localStorage.setItem('tc-api-theme','dark') }catch(e){}
+  }
+  if(animate && navBtn){
+    navBtn.style.transform='rotate(360deg)'
+    setTimeout(()=>{ navBtn.style.transform='' }, 350)
+  }
+}
+
+function toggleTheme(){
+  const isLight = document.documentElement.getAttribute('data-theme')==='light'
+  applyTheme(isLight?'dark':'light', true)
+}
+
+// ══════════════════════════════════════════════════════════
+//  AI ASSISTANT
+// ══════════════════════════════════════════════════════════
+const AI_KB = [
+  {keys:['call','endpoint','use','how','request','fetch','make'],answer:'To call an endpoint, make a GET request to:<br><code>'+API_BASE_URL+'/[path]?param=value</code><br>No API key needed! Example:<br><code>/tools/weather?city=London</code>'},
+  {keys:['ai','model','gpt','llama','groq','claude','perplexity','openai'],answer:'Supported AI models: <strong>GPT-4o-mini</strong>, <strong>o3-mini</strong>, <strong>Groq Llama 3.3 70B</strong>, <strong>Google Gemini</strong> (multi-turn), <strong>Pollinations</strong>, <strong>Perplexity</strong> (turbo/sonar), <strong>Claude</strong>, <strong>DeepSeek</strong>, <strong>Flux image gen</strong>, <strong>Whisper STT</strong>, and <strong>TTS</strong> with 6 voices.'},
+  {keys:['rate limit','limit','throttle','quota'],answer:'✅ <strong>No rate limits.</strong> Zero throttling, zero API keys, zero auth. Make as many requests as you want, completely free.'},
+  {keys:['contact','support','help','whatsapp','telegram','reach'],answer:'Reach the Trashcore team on:<br>• <strong>WhatsApp:</strong> +254 787 909 276<br>• <strong>Telegram:</strong> @trashcoredev2<br>Use the menu (top-left) for quick links!'},
+  {keys:['download','youtube','spotify','tiktok','instagram','facebook','twitter'],answer:'The <strong>Downloader</strong> category has <strong>31 endpoints</strong> covering YouTube (15 variants: MP3, MP4, play, stream, V1/V2/V3/V4, ytv, ytv4, ytv4play), Spotify (3 variants), TikTok, Instagram (V1/V2), Facebook (V1/V2), Twitter/X, SoundCloud, CapCut, Pinterest, GitHub, Google Drive, Terabox, and npm.'},
+  {keys:['free','cost','price','pay','key','auth'],answer:'<strong>100% Free. Forever.</strong> No API keys, no auth headers, no credit card, no sign-up. Just make HTTP requests.'},
+  {keys:['endpoint','how many','count','total','category','categories'],answer:'Trashcore API has <strong>142 endpoints</strong> across <strong>8 categories</strong>: Downloader (31), Search (10), Social (2), Tools (4), NSFW (4), AI (17), Fun (38), and Ephoto (33).'},
+  {keys:['install','setup','start','npm','node','server'],answer:'1. <code>npm install express cors @trashcore/trash-api multer</code><br>2. <code>node server.js</code><br>3. Test: <code>/tools/weather?city=London</code><br>Check the Install Guide section on the home page!'},
+  {keys:['ephoto','image','text effect','photo','effect'],answer:'The <strong>Ephoto</strong> category has 38+ stylized text effects — glitch, neon, 3D, galaxy, K-pop, watercolor, gold, flag, and retro styles. All return an image URL.'},
+  {keys:['fun','anime','reaction','gif','nekos','waifu','truth','dare','bible','quran','quote'],answer:'The <strong>Fun</strong> category has <strong>38 endpoints</strong>: 11 nekos.life images, 20 waifu.pics reaction GIFs, plus Truth, Dare, Would You Rather, Quote, Quote Audio, Bible verse, and Quran ayah. No params needed for most!'},
+  {keys:['search','lyrics','wikipedia','wallpaper','sticker','spotify search'],answer:'The <strong>Search</strong> category covers: song lyrics, Spotify tracks/artists, Google Images, HD wallpapers, WhatsApp/Telegram stickers, and Wikipedia articles/details.'},
+  {keys:['social','tiktok profile','instagram profile','stalk','scrape'],answer:'The <strong>Social</strong> category lets you scrape TikTok and Instagram public profiles — followers, following, likes, posts, bio, and more.'},
+  {keys:['weather','tools','dictionary','resize'],answer:'The <strong>Tools</strong> category includes: text-to-image (TTP), image resize, live weather for any city, and dictionary definitions/pronunciation.'},
+  {keys:['blue','color','theme','design'],answer:'Yep! This version of the Trashcore API docs runs a sleek <strong>blue theme</strong> 💙 with electric blue (#0088ff) and cyan accents. Use the theme toggle button (top-right) to switch between dark and light mode!'},
+  {keys:['tts','speech','voice','audio','text to speech'],answer:'Use <code>/ai/tts?text=hello&voice=tara</code> to convert text to speech. Available voices: <strong>tara, autumn, liam, emma, ethan, sophia</strong>. Returns a hosted WAV URL (expires 10 min).'},
+]
+
+function aiGetResponse(input){
+  const q = input.toLowerCase()
+  for(const e of AI_KB){
+    if(e.keys.some(k=>q.includes(k))) return e.answer
+  }
+  return "I'm not sure about that one! Try the menu → Browse Endpoints to explore, or contact us on <strong>WhatsApp</strong> (+254 787 909 276) or <strong>Telegram</strong> (@trashcoredev2) for direct help."
+}
+
+function toggleAI(){
+  const panel = document.getElementById('ai-panel')
+  panel.classList.toggle('open')
+  if(panel.classList.contains('open')) setTimeout(()=>document.getElementById('ai-input').focus(),300)
+}
+
+function aiAsk(q){ document.getElementById('ai-input').value=q; aiSend() }
+
+function aiAddMessage(text, role){
+  const msgs = document.getElementById('ai-messages')
+  const el = document.createElement('div')
+  el.className='ai-msg '+role
+  el.innerHTML = role==='bot'
+    ? `<div class="ai-msg-label">AI Assistant</div>${text}`
+    : `<div class="ai-msg-label">You</div>${text}`
+  msgs.appendChild(el)
+  msgs.scrollTop=msgs.scrollHeight
+  document.getElementById('ai-quick-btns').style.display='none'
+}
+
+function aiSend(){
+  const input=document.getElementById('ai-input')
+  const q=input.value.trim()
+  if(!q) return
+  aiAddMessage(q,'user')
+  input.value=''
+  const msgs=document.getElementById('ai-messages')
+  const typing=document.createElement('div')
+  typing.className='ai-typing'
+  typing.innerHTML='<span></span><span></span><span></span>'
+  msgs.appendChild(typing); msgs.scrollTop=msgs.scrollHeight
+  setTimeout(()=>{
+    typing.remove()
+    aiAddMessage(aiGetResponse(q),'bot')
+  }, 700+Math.random()*400)
+}
+
+// ══════════════════════════════════════════════════════════
+//  MUSIC PLAYER
+// ══════════════════════════════════════════════════════════
+const PLAYLIST=[
+  'https://www.image2url.com/r2/default/files/1778922001406-72c136d1-4ce4-4663-8cbf-b441a79108f9.mp3',
+  'https://files.soonex.biz.id/upload/7bc990f06e0e.mp3',
+  'https://files.soonex.biz.id/upload/448281b2b031.mp3',
+  'https://files.soonex.biz.id/upload/a9e9fb54279b.mp3'
+]
+let musicIdx=0
+const bgAudio=document.getElementById('bg-music')
+const musicPlayer=document.getElementById('music-player')
+const musicCounter=document.getElementById('music-counter')
+function updateCounter(){ musicCounter.textContent=(musicIdx+1)+'/'+PLAYLIST.length }
+function loadTrack(idx,play){
+  musicIdx=((idx%PLAYLIST.length)+PLAYLIST.length)%PLAYLIST.length
+  bgAudio.src=PLAYLIST[musicIdx]; updateCounter()
+  if(play) bgAudio.play().catch(()=>{})
+}
+bgAudio.addEventListener('ended',()=>loadTrack(musicIdx+1,true))
+loadTrack(0,false)
+function toggleMusic(){
+  if(bgAudio.paused){ bgAudio.play().then(()=>musicPlayer.classList.add('playing')).catch(()=>{}) }
+  else { bgAudio.pause(); musicPlayer.classList.remove('playing') }
+}
+function musicPrev(){ loadTrack(musicIdx-1,!bgAudio.paused) }
+function musicNext(){ loadTrack(musicIdx+1,!bgAudio.paused) }
+
+// ══════════════════════════════════════════════════════════
+//  SESSION
+// ══════════════════════════════════════════════════════════
+let sessionStart=Date.now()
+let totalReqs=0
+let visitedCats=new Set()
+function incRequests(){
+  totalReqs++
+  document.getElementById('s-reqs').textContent=totalReqs
+  document.getElementById('sb-reqs').textContent=totalReqs
+  const badge=document.getElementById('s-reqs-badge')
+  badge.style.display='block'
+  setTimeout(()=>badge.style.display='none',2000)
+}
+setInterval(()=>{
+  const s=Math.floor((Date.now()-sessionStart)/1000)
+  const mm=String(Math.floor(s/60)).padStart(2,'0')
+  const ss=String(s%60).padStart(2,'0')
+  const t=mm+':'+ss
+  const el=document.getElementById('s-session')
+  if(el) el.textContent=t
+  const lbl=document.getElementById('session-time-lbl')
+  if(lbl) lbl.textContent='Session: '+t
+},1000)
+
+function detectBrowser(){
+  const ua=navigator.userAgent
+  let browser='Unknown',os='Unknown'
+  if(ua.includes('Firefox')) browser='Firefox'
+  else if(ua.includes('Edg')) browser='Edge'
+  else if(ua.includes('Chrome')) browser='Chrome'
+  else if(ua.includes('Safari')) browser='Safari'
+  if(ua.includes('Android')) os='Android'
+  else if(ua.includes('iPhone')||ua.includes('iPad')) os='iOS'
+  else if(ua.includes('Windows')) os='Windows'
+  else if(ua.includes('Mac')) os='macOS'
+  else if(ua.includes('Linux')) os='Linux'
+  const el=document.getElementById('s-browser')
+  if(el) el.textContent=browser+' / '+os
+}
+detectBrowser()
+
+async function measurePing(){
+  const t=Date.now()
+  try{
+    await fetch(API_BASE_URL+'/ping?_='+t,{cache:'no-store'})
+    setPing(Date.now()-t)
+  }catch{
+    try{ const t2=Date.now(); await fetch('https://api.ipify.org?format=json',{cache:'no-store'}); setPing(Date.now()-t2) }
+    catch{ setPing(null) }
+  }
+}
+function setPing(ms){
+  const label=ms===null?'--ms':(ms+'ms')
+  const badge=ms===null?'N/A':ms<100?'GREAT':ms<300?'GOOD':'SLOW'
+  ;[document.getElementById('s-ping'),document.getElementById('nav-ping'),
+    document.getElementById('lm-ping'),document.getElementById('footer-ping'),
+    document.getElementById('sb-ping')].forEach(el=>{
+    if(el) el.textContent=ms===null?'--':(el.id==='footer-ping'?'ping: '+label:(el.id==='sb-ping'?ms:label))
+  })
+  const pb=document.getElementById('s-ping-badge')
+  if(pb){pb.textContent=badge;pb.style.background=ms===null?'rgba(239,68,68,.08)':ms<100?'rgba(0,136,255,.08)':ms<300?'rgba(0,204,255,.08)':'rgba(234,179,8,.08)'}
+  const navPing=document.getElementById('nav-ping')
+  if(navPing) navPing.style.display='block'
+}
+setInterval(measurePing,30000)
+
+async function fetchIP(){
+  try{
+    const r=await fetch('https://ipapi.co/json/')
+    const d=await r.json()
+    const ipEl=document.getElementById('s-ip'),regEl=document.getElementById('s-region')
+    if(ipEl&&d.ip) ipEl.textContent=d.ip
+    if(regEl) regEl.textContent=(d.city||'--')+' / '+(d.org||'--').split(' ').slice(0,2).join(' ')
+  }catch{
+    try{ const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); const el=document.getElementById('s-ip'); if(el&&d.ip) el.textContent=d.ip }catch{}
+  }
+}
+
+async function getBattery(){
+  if(!navigator.getBattery) return
+  try{
+    const b=await navigator.getBattery()
+    function updateBatt(){
+      const pct=Math.round(b.level*100)
+      const el=document.getElementById('s-batt'),bar=document.getElementById('batt-bar'),badge=document.getElementById('s-batt-badge')
+      if(el) el.textContent=pct+'%'+(b.charging?' ⚡':'')
+      if(bar){ bar.style.width=pct+'%'; bar.style.background=pct>50?'var(--green)':pct>20?'var(--yellow)':'var(--red)' }
+      if(badge) badge.textContent=b.charging?'CHARGING':(pct>50?'GOOD':pct>20?'LOW':'CRITICAL')
     }
+    updateBatt()
+    b.addEventListener('levelchange',updateBatt)
+    b.addEventListener('chargingchange',updateBatt)
+  }catch{}
+}
 
-    /* ─── Form refs ─── */
-    const form        = document.getElementById('reportForm');
-    const submitBtn   = document.getElementById('submitBtn');
-    const phoneInput  = document.getElementById('phone');
-    const reasonSel   = document.getElementById('reason');
-    const descInput   = document.getElementById('description');
-    const phoneError  = document.getElementById('phoneError');
-    const reasonError = document.getElementById('reasonError');
-    const descError   = document.getElementById('descriptionError');
+// ══════════════════════════════════════════════════════════
+//  LOADING SCREEN — Spinner (10 seconds)
+// ══════════════════════════════════════════════════════════
+const LD_DURATION = 10000
+const LD_CIRCUMFERENCE = 2 * Math.PI * 52  // 326.73
 
-    const reportSection = document.getElementById('reportSection');
-    const reportOutput  = document.getElementById('reportOutput');
-    const reportIdDisp  = document.getElementById('reportIdDisplay');
-    const copyBtn       = document.getElementById('copyBtn');
-    const downloadBtn   = document.getElementById('downloadBtn');
-    const clearBtn      = document.getElementById('clearBtn');
+const ldArc = document.getElementById('ld-arc')
+const ldPctLabel = document.getElementById('ld-pct-label')
+const ldStatusText = document.getElementById('ld-status-text')
+const ldMetaPct = document.getElementById('lm-pct')
+const ldMetaTime = document.getElementById('lm-time')
+const ldMetaStatus = document.getElementById('lm-status')
 
-    let currentReportId = '';
+ldArc.style.strokeDasharray = LD_CIRCUMFERENCE
+ldArc.style.strokeDashoffset = LD_CIRCUMFERENCE
 
-    /* ─── Validation ─── */
-    function validPhone(v)  { return v.replace(/\D/g,'').length >= 10; }
-    function validReason(v) { return v !== ''; }
-    function validDesc(v)   { return v.trim().length >= 10; }
+const LD_STATUS_MSGS = [
+  {at:0,    text:'Initializing <span>runtime environment</span>...'},
+  {at:1500, text:'Establishing <span>secure connection</span>...'},
+  {at:3000, text:'Measuring <span>server ping</span>...'},
+  {at:4500, text:'Checking <span>API health status</span>...'},
+  {at:6000, text:'Fetching <span>endpoint registry</span>...'},
+  {at:7500, text:'Loading <span>session data</span>...'},
+  {at:9000, text:'Rendering <span>documentation</span>...'},
+]
 
-    function checkField(input, errEl, validator) {
-      const ok = validator(input.value);
-      errEl.classList.toggle('show', !ok);
-      input.classList.toggle('error', !ok);
-      return ok;
-    }
+LD_STATUS_MSGS.forEach(m=>{ setTimeout(()=>{ ldStatusText.innerHTML=m.text },m.at) })
 
-    phoneInput.addEventListener('blur',   () => checkField(phoneInput, phoneError, validPhone));
-    phoneInput.addEventListener('input',  () => { if (validPhone(phoneInput.value)) { phoneError.classList.remove('show'); phoneInput.classList.remove('error'); } });
-    reasonSel.addEventListener('change',  () => checkField(reasonSel, reasonError, validReason));
-    descInput.addEventListener('input',   () => { if (validDesc(descInput.value)) { descError.classList.remove('show'); descInput.classList.remove('error'); } });
+const ldStart = Date.now()
 
-    /* ─── Submit ─── */
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const ok = [
-        checkField(phoneInput, phoneError, validPhone),
-        checkField(reasonSel,  reasonError, validReason),
-        checkField(descInput,  descError,  validDesc)
-      ].every(Boolean);
+function updateLdSpinner(){
+  const elapsed = Date.now() - ldStart
+  const pct = Math.min(100, Math.round((elapsed/LD_DURATION)*100))
+  const offset = LD_CIRCUMFERENCE - (pct/100)*LD_CIRCUMFERENCE
+  ldArc.style.strokeDashoffset = offset
+  ldPctLabel.textContent = pct+'%'
+  if(ldMetaPct) ldMetaPct.textContent = pct+'%'
+  if(pct<100) requestAnimationFrame(updateLdSpinner)
+}
+requestAnimationFrame(updateLdSpinner)
 
-      if (!ok) { showToast('Please fix the highlighted fields', 'error'); return; }
+const ldElTimer = setInterval(()=>{
+  const s = Math.round((Date.now()-ldStart)/1000)
+  if(ldMetaTime) ldMetaTime.textContent=s+'s'
+},500)
 
-      submitBtn.classList.add('loading');
-      submitBtn.disabled = true;
-      submitBtn.querySelector('.btn-text').textContent = 'Generating…';
+// step 3: measure ping during load
+setTimeout(()=>{
+  const pt=Date.now()
+  fetch('https://api.ipify.org?format=json',{cache:'no-store'}).then(()=>{
+    const ms=Date.now()-pt
+    if(ldMetaStatus) ldMetaStatus.textContent='ONLINE'
+    setPing(ms)
+  }).catch(()=>{ if(ldMetaStatus) ldMetaStatus.textContent='ONLINE' })
+},3000)
 
-      try {
-        const res = await fetch(`${API_URL}${CONFIG.endpoints.generateReport}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phone:       phoneInput.value.trim(),
-            reason:      reasonSel.value,
-            description: descInput.value.trim()
-          })
-        });
-        const data = await res.json();
+setTimeout(()=>{
+  clearInterval(ldElTimer)
+  if(ldMetaStatus) ldMetaStatus.textContent='READY'
+  renderCats()
+  fetchIP(); getBattery(); measurePing()
+  const loader = document.getElementById('loader')
+  loader.classList.add('fade-out')
+  setTimeout(()=>{ loader.style.display='none' },600)
+}, LD_DURATION)
 
-        if (res.ok && data.success) {
-          reportOutput.value = data.report;
-          currentReportId = data.reportId || '';
-          reportIdDisp.innerHTML = `Report ID: <span>#${currentReportId}</span>`;
-          reportSection.style.display = 'block';
-          reportSection.classList.add('slide-in');
-          showToast('Report generated successfully!', 'success');
-          form.reset();
-          document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-          loadStats();
-        } else {
-          const msg = data.errors ? data.errors.join(', ') : (data.error || 'Failed to generate report');
-          showToast(msg, 'error');
-        }
-      } catch {
-        showToast('Network error — please try again', 'error');
-        setStatus('offline');
-      } finally {
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-        submitBtn.querySelector('.btn-text').textContent = '⚡ Generate Report';
-      }
-    });
+// ══════════════════════════════════════════════════════════
+//  BROWSE OVERLAY — unchanged
+// ══════════════════════════════════════════════════════════
+const BO_STEPS=[
+  {id:'bs0',label:'Fetching route map',pct:15,dur:1500},
+  {id:'bs1',label:'Loading endpoint documentation',pct:38,dur:2500},
+  {id:'bs2',label:'Validating parameter schemas',pct:60,dur:2000},
+  {id:'bs3',label:'Building interactive playground',pct:82,dur:2500},
+  {id:'bs4',label:'Rendering category view',pct:100,dur:1500},
+]
+const BO_MSGS=['Connecting to endpoint registry...','Fetching OpenAPI schema...','Compiling route documentation...','Validating request parameters...','Linking response schemas...','Preparing interactive playground...','Almost ready...']
 
-    /* ─── Copy ─── */
-    copyBtn.addEventListener('click', async () => {
-      if (!reportOutput.value) return;
-      try {
-        await navigator.clipboard.writeText(reportOutput.value);
-      } catch {
-        reportOutput.select();
-        document.execCommand('copy');
-      }
-      showToast('Report copied to clipboard!', 'success');
-    });
+function showBrowseOverlay(catName,onDone){
+  const ov=document.getElementById('browse-overlay')
+  document.getElementById('bo-cat-name').textContent=catName
+  document.getElementById('bo-bar').style.width='0%'
+  document.getElementById('bo-pct').textContent='0%'
+  document.getElementById('bo-msg').textContent=BO_MSGS[0]
+  BO_STEPS.forEach(s=>{ const el=document.getElementById(s.id); if(el){el.classList.remove('done','active')} })
+  ov.classList.add('show')
+  let si2=0,msgI=0
+  const msgTimer=setInterval(()=>{
+    msgI=(msgI+1)%BO_MSGS.length
+    const el=document.getElementById('bo-msg')
+    if(el){el.style.opacity=0;setTimeout(()=>{el.textContent=BO_MSGS[msgI];el.style.opacity=1},200)}
+  },1500)
+  const bar=document.getElementById('bo-bar'),pctEl=document.getElementById('bo-pct')
+  function nextBoStep(){
+    if(si2>0){ document.getElementById(BO_STEPS[si2-1].id)?.classList.remove('active'); document.getElementById(BO_STEPS[si2-1].id)?.classList.add('done') }
+    if(si2>=BO_STEPS.length){ clearInterval(msgTimer); ov.classList.remove('show'); onDone(); return }
+    const step=BO_STEPS[si2]
+    document.getElementById(step.id)?.classList.add('active')
+    const startPct2=si2===0?0:BO_STEPS[si2-1].pct
+    const stepStart=Date.now()
+    const bi=setInterval(()=>{
+      const ratio=Math.min((Date.now()-stepStart)/step.dur,1)
+      const eased=ratio<0.5?2*ratio*ratio:1-Math.pow(-2*ratio+2,2)/2
+      const p=startPct2+(step.pct-startPct2)*eased
+      bar.style.width=p+'%'; pctEl.textContent=Math.round(p)+'%'
+      if(ratio>=1) clearInterval(bi)
+    },30)
+    si2++; setTimeout(nextBoStep,step.dur)
+  }
+  nextBoStep()
+}
 
-    /* ─── Download ─── */
-    downloadBtn.addEventListener('click', () => {
-      if (!reportOutput.value) return;
-      const blob = new Blob([reportOutput.value], { type: 'text/plain' });
-      const url  = URL.createObjectURL(blob);
-      const a    = Object.assign(document.createElement('a'), {
-        href:     url,
-        download: `whatsapp-report-${currentReportId || Date.now()}.txt`
-      });
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('Report downloaded!', 'success');
-    });
+// ══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════
+function showView(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById('view-'+id).classList.add('active'); window.scrollTo(0,0) }
+function goToSection(id){ showView('home'); setTimeout(()=>{ document.getElementById(id)?.scrollIntoView({behavior:'smooth'}) },50); closeDrawer() }
+function openDrawer(){ document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('open') }
+function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open') }
+function toggleFaq(item){ item.classList.toggle('open') }
+function copyLine(btn,text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const o=btn.textContent;btn.textContent='✓';btn.classList.add('ok')
+    setTimeout(()=>{btn.textContent=o;btn.classList.remove('ok')},1500)
+  })
+}
 
-    /* ─── Clear ─── */
-    clearBtn.addEventListener('click', () => {
-      reportOutput.value = '';
-      reportSection.style.display = 'none';
-      reportIdDisp.textContent = '';
-      showToast('Report cleared', 'info');
-    });
+// ══════════════════════════════════════════════════════════
+//  ENDPOINT DATA — unchanged from original
+// ══════════════════════════════════════════════════════════
+const CAT_META={
+  downloader:{icon:'⬇️',color:'#0088ff'},
+  search:{icon:'🔍',color:'#00ccff'},
+  social:{icon:'👥',color:'#a855f7'},
+  tools:{icon:'🛠️',color:'#f97316'},
+  nsfw:{icon:'🔞',color:'#ef4444'},
+  ai:{icon:'🤖',color:'#eab308'},
+  fun:{icon:'🎉',color:'#ec4899'},
+  ephoto:{icon:'🎨',color:'#8b5cf6'},
+}
 
-    /* ─── Init ─── */
-    (async function init() {
-      setStatus('connecting');
-      const up = await checkHealth();
-      if (up) {
-        await loadStats();
-      } else {
-        document.getElementById('recentReportsList').innerHTML =
-          `<div class="empty-state"><p>⚠️ Cannot reach backend — check your API URL</p></div>`;
-        showToast('Cannot connect to backend', 'error');
-      }
-      setInterval(async () => {
-        const alive = await checkHealth();
-        if (alive) loadStats();
-      }, 30000);
-    })();
-  </script>
-</body>
-</html>
+const CATS=[
+  {id:'downloader',name:'Downloader',count:31,desc:'YouTube (audio, MP3, MP4, V1-V4, ytplay, ytvideo, ytv, ytv4, ytv4play), Spotify (V1-V3), SoundCloud, CapCut, Instagram (V1/V2), Facebook (V1/V2), Pinterest, TikTok, Twitter, GitHub, Google Drive, Terabox, npm',eps:[
+    {name:'YouTube Play',path:'/downloader/ytplay',desc:'Search YouTube by song name → MP3 download via ytmp3.cc.',params:[{n:'q',req:1,ph:'Alan Walker Faded'}],ex:'{"title":"Alan Walker - Faded","video_id":"60ItHLz5WEA","download_url":"https://...","format":"mp3"}'},
+    {name:'YouTube Video (Search)',path:'/downloader/ytvideo',desc:'Search YouTube by query → MP4 download.',params:[{n:'q',req:1,ph:'Alan Walker Faded MV'}],ex:'{"title":"Alan Walker - Faded","download_url":"https://...","format":"mp4"}'},
+    {name:'YouTube MP3 Direct',path:'/downloader/ytmp3',desc:'Convert a YouTube video URL directly to MP3 via y2mate.',params:[{n:'url',req:1,ph:'https://youtu.be/dQw4w9WgXcQ'}],ex:'{"title":"Rick Astley - Never Gonna Give You Up","download_url":"https://..."}'},
+    {name:'YouTube MP4 Direct',path:'/downloader/ytmp4',desc:'Convert a YouTube video URL directly to MP4 via y2mate.',params:[{n:'url',req:1,ph:'https://youtu.be/dQw4w9WgXcQ'}],ex:'{"title":"Rick Astley - Never Gonna Give You Up","download_url":"https://..."}'},
+    {name:'YouTube MP3 V1',path:'/downloader/ytmp3v1',desc:'Convert a YouTube URL to MP3 via ytmp3.cc (V1).',params:[{n:'url',req:1,ph:'https://youtu.be/dQw4w9WgXcQ'}],ex:'{"title":"Rick Astley - Never Gonna Give You Up","download_url":"https://...","format":"mp3"}'},
+    {name:'YouTube MP4 V1',path:'/downloader/ytmp4v1',desc:'Convert a YouTube URL to MP4 via ytmp3.cc (V1).',params:[{n:'url',req:1,ph:'https://youtu.be/dQw4w9WgXcQ'}],ex:'{"title":"Rick Astley - Never Gonna Give You Up","download_url":"https://...","format":"mp4"}'},
+    {name:'YouTube Audio',path:'/downloader/yta',desc:'Search YouTube by song name and return metadata + download URL.',params:[{n:'q',req:1,ph:'Alan Walker Faded'},{n:'quality',req:0,ph:'128k'}],ex:'"title":"Alan Walker - Faded","duration":"3:32","dl_url":"https://..."'},
+    {name:'YouTube Audio Stream',path:'/downloader/ytastream',desc:'Downloads audio from YouTube and returns a temporary hosted MP3 URL (expires 10 min).',params:[{n:'q',req:1,ph:'Alan Walker Faded'},{n:'quality',req:0,ph:'128k'}],ex:'"url":"https://yourserver.com/audio/abc123.mp3","expires_in":"10 minutes"'},
+    {name:'YouTube Play V2',path:'/downloader/ytplayv2',desc:'Search YouTube by song name → MP3 via y2mate.',params:[{n:'q',req:1,ph:'Alan Walker Faded'}],ex:'{"title":"Alan Walker - Faded","download_url":"https://dl.y2mate.com/..."}'},
+    {name:'YouTube Play V3',path:'/downloader/ytplayv3',desc:'Search YouTube → best audio format via ytDownload.',params:[{n:'q',req:1,ph:'Alan Walker Faded'}],ex:'{"title":"Alan Walker - Faded","audio":{"url":"https://...","quality":"160kbps"}}'},
+    {name:'YouTube Video (Search)',path:'/downloader/video',desc:'Search YouTube by query → best MP4 via y2mate.',params:[{n:'q',req:1,ph:'Alan Walker Faded MV'}],ex:'{"title":"Alan Walker - Faded","download_url":"https://dl.y2mate.com/...","format":"mp4"}'},
+    {name:'YouTube Video V2',path:'/downloader/videov2',desc:'Search YouTube → best video format via ytDownload.',params:[{n:'q',req:1,ph:'Alan Walker Faded MV'}],ex:'{"title":"Alan Walker - Faded","best":{"url":"https://...","quality":"1080p"}}'},
+    {name:'YouTube Video Direct',path:'/downloader/ytv',desc:'Download a YouTube video by URL with selectable quality.',params:[{n:'url',req:1,ph:'https://youtu.be/dQw4w9WgXcQ'},{n:'quality',req:0,ph:'360p',select:['144p','240p','360p','480p','720p','1080p']}],ex:'{"title":"Rick Astley - Never Gonna Give You Up","download_url":"https://...","quality":"360p"}'},
+    {name:'YouTube V4 (URL)',path:'/downloader/ytv4',desc:'Download audio or video from a YouTube URL using the V4 engine. Set type to audio for MP3 or video for MP4.',params:[{n:'url',req:1,ph:'https://youtu.be/dQw4w9WgXcQ'},{n:'type',req:0,ph:'audio',select:['audio','video']}],ex:'{"title":"Rick Astley - Never Gonna Give You Up","download_url":"https://...","type":"audio","quality":"128kbps"}'},
+    {name:'YouTube V4 Play (Search)',path:'/downloader/ytv4play',desc:'Search YouTube and download audio or video via the V4 engine. Great for bots — just pass a song name.',params:[{n:'q',req:1,ph:'Alan Walker Faded'},{n:'type',req:0,ph:'audio',select:['audio','video']}],ex:'{"title":"Alan Walker - Faded","download_url":"https://...","type":"audio","quality":"128kbps"}'},
+    {name:'Spotify',path:'/downloader/spotify',desc:'Download a Spotify track by URL. Returns hosted MP3.',params:[{n:'url',req:1,ph:'https://open.spotify.com/track/...'}],ex:'"title":"Blinding Lights","artist":"The Weeknd","url":"https://..."'},
+    {name:'Spotify V2',path:'/downloader/spotifyv2',desc:'Download a Spotify track by search query.',params:[{n:'q',req:1,ph:'Faded Alan Walker'}],ex:'{"title":"Faded","artist":"Alan Walker","download_url":"https://..."}'},
+    {name:'Spotify V3',path:'/downloader/spotifyv3',desc:'Alternative Spotify downloader. Pass track URL.',params:[{n:'url',req:1,ph:'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC'}],ex:'{"title":"Faded","artist":"Alan Walker","download_url":"https://..."}'},
+    {name:'SoundCloud',path:'/downloader/soundcloud',desc:'Search SoundCloud tracks or download a specific track.',params:[{n:'q',req:0,ph:'Alan Walker Faded'},{n:'url',req:0,ph:'https://soundcloud.com/...'}],ex:'[{"title":"Faded","stream_url":"https://..."}]'},
+    {name:'TikTok',path:'/downloader/tiktok',desc:'Download TikTok video without watermark.',params:[{n:'url',req:1,ph:'https://vm.tiktok.com/...'}],ex:'"play":"https://...","author":"username"'},
+    {name:'Twitter / X',path:'/downloader/twitter',desc:'Download video or image from a tweet URL.',params:[{n:'url',req:1,ph:'https://x.com/user/status/...'}],ex:'"HD":"https://...","SD":"https://..."'},
+    {name:'Facebook',path:'/downloader/facebook',desc:'Download a Facebook video.',params:[{n:'url',req:1,ph:'https://fb.watch/...'}],ex:'"hd":"https://...","sd":"https://..."'},
+    {name:'Facebook V2',path:'/downloader/facebookv2',desc:'Download a Facebook video or photo (alternative scraper).',params:[{n:'url',req:1,ph:'https://www.facebook.com/share/...'}],ex:'{"video_url":"https://...","thumbnail":"https://..."}'},
+    {name:'Instagram Post / Reel',path:'/downloader/instagram',desc:'Download a public Instagram post, reel, or TV video.',params:[{n:'url',req:1,ph:'https://www.instagram.com/p/CxAbCdEf123/'}],ex:'"type":"video","media_url":"https://..."'},
+    {name:'Instagram DL V2',path:'/downloader/igdlv2',desc:'Alternative Instagram downloader (V2 scraper).',params:[{n:'url',req:1,ph:'https://www.instagram.com/p/CxAbCdEf123/'}],ex:'{"media":[{"url":"https://...","type":"video"}]}'},
+    {name:'CapCut',path:'/downloader/capcut',desc:'Download a CapCut template video without watermark.',params:[{n:'url',req:1,ph:'https://www.capcut.com/template-detail/...'}],ex:'{"title":"Awesome Template","video_url":"https://..."}'},
+    {name:'Pinterest',path:'/downloader/pinterest',desc:'Download a Pinterest pin — video or image.',params:[{n:'url',req:1,ph:'https://www.pinterest.com/pin/123456789/'}],ex:'{"type":"video","media_url":"https://..."}'},
+    {name:'GitHub Clone',path:'/downloader/github',desc:'Generate direct ZIP/tarball URL for any public GitHub repo.',params:[{n:'url',req:1,ph:'https://github.com/user/repo'}],ex:'{"zip_url":"https://api.github.com/repos/.../zipball"}'},
+    {name:'Google Drive',path:'/downloader/gdrive',desc:'Get direct download link for a Google Drive file.',params:[{n:'url',req:1,ph:'https://drive.google.com/file/d/...'}],ex:'"fileName":"document.pdf","downloadUrl":"https://..."'},
+    {name:'Terabox',path:'/downloader/terabox',desc:'Download files from Terabox. Pass a share link.',params:[{n:'url',req:1,ph:'https://terabox.com/s/...'}],ex:'{"file_name":"my_video.mp4","download_url":"https://..."}'},
+    {name:'npm Package',path:'/downloader/npm',desc:'Search npm and return package metadata.',params:[{n:'q',req:1,ph:'axios'}],ex:'"name":"axios","version":"1.6.0","description":"Promise based HTTP client"'}
+  ]},
+  {id:'search',name:'Search',count:12,desc:'YouTube, song lyrics, Spotify tracks, Google images, HD wallpapers, stickers, Wikipedia',eps:[
+    {name:'YouTube Search',path:'/search/youtube',desc:'Search YouTube and return video results with titles, thumbnails, durations, channel names, and view counts.',params:[{n:'q',req:1,ph:'Alan Walker Faded'},{n:'limit',req:0,ph:'10'}],ex:'[{"videoId":"60ItHLz5WEA","title":"Alan Walker - Faded","thumbnail":"https://i.ytimg.com/vi/...","duration":"3:32","channel":"Alan Walker","views":"1.8B","url":"https://www.youtube.com/watch?v=60ItHLz5WEA"}]'},
+    {name:'Song Lyrics',path:'/search/lyrics',desc:'Get full song lyrics.',params:[{n:'q',req:1,ph:'Alan Walker Faded'}],ex:'"title":"Faded","artist":"Alan Walker","lyrics":"You were the shadow..."'},
+    {name:'Google Images',path:'/search/gimage',desc:'Return image URLs from Google Image Search.',params:[{n:'q',req:1,ph:'anime wallpaper 4k'}],ex:'["https://example.com/img1.jpg"]'},
+    {name:'Wallpaper',path:'/search/wallpaper',desc:'Search HD wallpapers with pagination.',params:[{n:'q',req:1,ph:'nature mountain'},{n:'page',req:0,ph:'1'}],ex:'[{"title":"Mountain Sunrise","image":"https://...","resolution":"3840x2160"}]'},
+    {name:'Spotify Track Search',path:'/search/spotify',desc:'Search tracks.',params:[{n:'q',req:1,ph:'Alan Walker Faded'},{n:'limit',req:0,ph:'10'}],ex:'[{"title":"Faded","artist":"Alan Walker","preview_url":"https://...mp3"}]'},
+    {name:'Spotify Artist Search',path:'/search/spotifyartist',desc:'Search artists by name.',params:[{n:'q',req:1,ph:'Alan Walker'},{n:'limit',req:0,ph:'5'}],ex:'[{"name":"Alan Walker","nb_fan":12500000}]'},
+    {name:'Sticker Pack',path:'/search/sticker',desc:'Search WhatsApp/Telegram sticker packs.',params:[{n:'q',req:1,ph:'anime'}],ex:'"title":"Anime Sticker Pack","sticker_url":["https://...webp"]'},
+    {name:'Wikipedia Search',path:'/search/wikipedia',desc:'Search Wikipedia articles.',params:[{n:'q',req:1,ph:'Alan Walker musician'},{n:'limit',req:0,ph:'10'}],ex:'[{"title":"Alan Walker","extract":"...","url":"https://en.wikipedia.org/wiki/Alan_Walker"}]'},
+    {name:'Wikipedia Article Detail',path:'/search/wikipedia/detail',desc:'Fetch full content for a specific Wikipedia article.',params:[{n:'title',req:1,ph:'Alan Walker'}],ex:'{"title":"Alan Walker","extract":"Full article text..."}'},
+    {name:'Spotify URL Info',path:'/search/spotifyinfo',desc:'Resolve any Spotify URL.',params:[{n:'url',req:1,ph:'https://open.spotify.com/track/...'}],ex:'{"type":"track","title":"Alan Walker - Faded"}'},
+    {name:'Shazam (URL)',path:'/search/shazam',desc:'Identify a song from an audio file URL using Shazam audio fingerprinting.',params:[{n:'url',req:1,ph:'https://example.com/audio.mp3'}],ex:'{"title":"Faded","artist":"Alan Walker","album":"Different World","cover":"https://...","genres":["Electronic"]}'},
+    {name:'Shazam (Upload)',path:'/search/shazam',desc:'Identify a song by uploading an audio file (multipart/form-data). Max 20 MB.',params:[],method:'POST',isUpload:true,ex:'{"title":"Faded","artist":"Alan Walker","album":"Different World","cover":"https://..."}'}
+  ]},
+  {id:'social',name:'Social',count:2,desc:'Scrape TikTok and Instagram public profile data',eps:[
+    {name:'TikTok Profile',path:'/social/ttstalk',desc:'Get TikTok user profile info.',params:[{n:'username',req:1,ph:'charlidamelio'}],ex:'"username":"charlidamelio","followers":"152.8M"'},
+    {name:'Instagram Profile',path:'/social/igstalk',desc:'Get Instagram profile info and recent posts.',params:[{n:'username',req:1,ph:'cristiano'},{n:'limit',req:0,ph:'12'}],ex:'"username":"cristiano","followers":619000000'}
+  ]},
+  {id:'tools',name:'Tools',count:4,desc:'Text-to-image, image resize, live weather, and dictionary definitions',eps:[
+    {name:'Text to Image',path:'/tools/ttp',desc:'Render stylized text as an image.',params:[{n:'text',req:1,ph:'Trashcore'},{n:'color',req:0,ph:'7c3aed'}],ex:'"url":"https://cdn.example.com/ttp/abc123.png"'},
+    {name:'Image Resize',path:'/tools/resize',desc:'Resize any image from a URL to a target width.',params:[{n:'url',req:1,ph:'https://example.com/image.jpg'},{n:'width',req:0,ph:'1080'}],ex:'{"url":"https://...","width":1080,"height":720}'},
+    {name:'Weather',path:'/tools/weather',desc:'Get real-time weather information for any city.',params:[{n:'city',req:1,ph:'London'}],ex:'"city":"London","temperature":"15°C","condition":"Cloudy"'},
+    {name:'Dictionary',path:'/tools/dictionary',desc:'Get definitions and pronunciation for any English word.',params:[{n:'word',req:1,ph:'hello'}],ex:'"word":"hello","phonetic":"/həˈloʊ/","definitions":["used as a greeting"]'}
+  ]},
+  {id:'nsfw',name:'NSFW',count:4,desc:'Adult content scrapers — XNXX and Xvideos search and video metadata (18+ only)',eps:[
+    {name:'XNXX Search',path:'/nsfw/sxnxx',desc:'Search XNXX and return video results.',params:[{n:'q',req:1,ph:'search query'}],ex:'"result":[{"title":"...","link":"https://www.xnxx.com/video-..."}]'},
+    {name:'XNXX Video Info',path:'/nsfw/xnxx',desc:'Scrape metadata and download URL from an XNXX video page.',params:[{n:'url',req:1,ph:'https://www.xnxx.com/video-...'}],ex:'"title":"...","duration":"12 min","url_dl":"https://..."'},
+    
