@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/((?!$|index\\.html).*)",
+      "destination": "https://apis-production-828f.up.railway.app/$1"
+    }
+  ]
+}
