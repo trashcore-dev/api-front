@@ -1313,7 +1313,7 @@ async function getBattery(){
 // ══════════════════════════════════════════════════════════
 //  LOADING SCREEN — Spinner (10 seconds)
 // ══════════════════════════════════════════════════════════
-const LD_DURATION = 10000
+const LD_DURATION = 3000
 const LD_CIRCUMFERENCE = 2 * Math.PI * 52  // 326.73
 
 const ldArc = document.getElementById('ld-arc')
@@ -1328,35 +1328,34 @@ ldArc.style.strokeDashoffset = LD_CIRCUMFERENCE
 
 const LD_STATUS_MSGS = [
   {at:0,    text:'Initializing <span>runtime environment</span>...'},
-  {at:1500, text:'Establishing <span>secure connection</span>...'},
-  {at:3000, text:'Measuring <span>server ping</span>...'},
-  {at:4500, text:'Checking <span>API health status</span>...'},
-  {at:6000, text:'Fetching <span>endpoint registry</span>...'},
-  {at:7500, text:'Loading <span>session data</span>...'},
-  {at:9000, text:'Rendering <span>documentation</span>...'},
+  {at:600,  text:'Establishing <span>secure connection</span>...'},
+  {at:1200, text:'Fetching <span>endpoint registry</span>...'},
+  {at:1800, text:'Loading <span>session data</span>...'},
+  {at:2400, text:'Rendering <span>documentation</span>...'},
 ]
 
 LD_STATUS_MSGS.forEach(m=>{ setTimeout(()=>{ ldStatusText.innerHTML=m.text },m.at) })
 
 const ldStart = Date.now()
 
-function updateLdSpinner(){
+// Use setInterval instead of requestAnimationFrame so progress
+// keeps moving even when the tab is backgrounded or throttled on mobile.
+const ldSpinnerInterval = setInterval(()=>{
   const elapsed = Date.now() - ldStart
   const pct = Math.min(100, Math.round((elapsed/LD_DURATION)*100))
   const offset = LD_CIRCUMFERENCE - (pct/100)*LD_CIRCUMFERENCE
   ldArc.style.strokeDashoffset = offset
   ldPctLabel.textContent = pct+'%'
   if(ldMetaPct) ldMetaPct.textContent = pct+'%'
-  if(pct<100) requestAnimationFrame(updateLdSpinner)
-}
-requestAnimationFrame(updateLdSpinner)
+  if(pct>=100) clearInterval(ldSpinnerInterval)
+}, 30)
 
 const ldElTimer = setInterval(()=>{
   const s = Math.round((Date.now()-ldStart)/1000)
   if(ldMetaTime) ldMetaTime.textContent=s+'s'
 },500)
 
-// step 3: measure ping during load
+// measure ping during load
 setTimeout(()=>{
   const pt=Date.now()
   fetch('https://api.ipify.org?format=json',{cache:'no-store'}).then(()=>{
@@ -1364,7 +1363,7 @@ setTimeout(()=>{
     if(ldMetaStatus) ldMetaStatus.textContent='ONLINE'
     setPing(ms)
   }).catch(()=>{ if(ldMetaStatus) ldMetaStatus.textContent='ONLINE' })
-},3000)
+},1000)
 
 setTimeout(()=>{
   clearInterval(ldElTimer)
