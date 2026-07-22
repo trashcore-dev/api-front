@@ -945,8 +945,8 @@ footer strong{color:var(--text2)}
     <div class="sec-title">Up and Running in 2 Minutes</div>
     <div class="install-step"><div class="step-num">1</div><div style="flex:1"><div class="step-title">Install Dependencies</div><div class="code-line"><span>npm install express cors @trashcore/trash-api multer</span><button class="copy-sm" onclick="copyLine(this,'npm install express cors @trashcore/trash-api multer')">copy</button></div></div></div>
     <div class="install-step"><div class="step-num">2</div><div style="flex:1"><div class="step-title">Start the Server</div><div class="code-line"><span>node server.js</span><button class="copy-sm" onclick="copyLine(this,'node server.js')">copy</button></div></div></div>
-    <div class="install-step"><div class="step-num">3</div><div style="flex:1"><div class="step-title">Test a Route</div><div class="code-line"><span>/tools/weather?city=London</span><button class="copy-sm" onclick="copyLine(this,'https://api-front-lake.vercel.app/tools/weather?city=London')">copy</button></div></div></div>
-    <div class="install-step"><div class="step-num">4</div><div style="flex:1"><div class="step-title">Try AI Chat</div><div class="code-line"><span>/ai/gpt?prompt=Hello+world</span><button class="copy-sm" onclick="copyLine(this,'https://api-front-lake.vercel.app/ai/gpt?prompt=Hello+world')">copy</button></div></div></div>
+    <div class="install-step"><div class="step-num">3</div><div style="flex:1"><div class="step-title">Test a Route</div><div class="code-line"><span>/tools/weather?city=London</span><button class="copy-sm" onclick="copyLine(this,'https://api.drexapp.space/tools/weather?city=London')">copy</button></div></div></div>
+    <div class="install-step"><div class="step-num">4</div><div style="flex:1"><div class="step-title">Try AI Chat</div><div class="code-line"><span>/ai/gpt?prompt=Hello+world</span><button class="copy-sm" onclick="copyLine(this,'https://api.drexapp.space/ai/gpt?prompt=Hello+world')">copy</button></div></div></div>
   </div>
 
   <div class="section" id="pricing">
@@ -1602,7 +1602,7 @@ async function runApi(btn,path){
   const card=btn.closest('.ep-card'),uid=card.id,params=getParams(card)
   const qs=params.toString()?'?'+params.toString():''
   const fetchUrl="https://apis-production-828f.up.railway.app"+path+qs
-  const displayUrl="https://api-front-lake.vercel.app"+path+qs
+  const displayUrl="https://api.drexapp.space"+path+qs
   const rw=document.getElementById('rw-'+uid)
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Executing...'
   rw.className='result-wrap show';rw.innerHTML='<div style="font-family:var(--mono);font-size:.62rem;color:var(--text3)">Fetching response...</div>'
@@ -1641,7 +1641,7 @@ async function runUpload(btn,path){
 
 function copyUrl(btn,path){
   const params=getParams(btn.closest('.ep-card'))
-  const url="https://api-front-lake.vercel.app"+path+(params.toString()?'?'+params.toString():'')
+  const url="https://api.drexapp.space"+path+(params.toString()?'?'+params.toString():'')
   navigator.clipboard.writeText(url).then(()=>{ btn.style.color='var(--green)';setTimeout(()=>{btn.style.color=''},1500) })
 }
 function cpResult(btn){
